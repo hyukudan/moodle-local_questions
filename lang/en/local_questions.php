@@ -68,3 +68,14 @@ $string['questions:import'] = 'Import questions';
 $string['filterbytype'] = 'Filter by Type';
 $string['alltypes'] = 'All Types';
 
+// Gemini AI
+$string['gemini_settings'] = 'Gemini AI Configuration';
+$string['gemini_settings_desc'] = 'Configure integration with Google Gemini AI for question analysis.';
+$string['gemini_apikey'] = 'API Key';
+$string['gemini_apikey_desc'] = 'Your Google AI Studio API Key.';
+$string['gemini_model'] = 'Model';
+$string['gemini_model_desc'] = 'Select the Gemini model to use.';
+$string['gemini_prompt'] = 'System Prompt';
+$string['gemini_prompt_desc'] = 'Custom instructions for the AI auditor.';
+
+

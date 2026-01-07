@@ -37,6 +37,16 @@ A local plugin for Moodle 5.1 (compatible with 4.1+) that provides enhanced mana
 | `enable_features` | Toggle extended features on/off |
 | `enable_export` | Enable/disable export functionality |
 | `enable_import` | Enable/disable import functionality |
+| `gemini_apikey` | Google AI Studio API Key |
+| `gemini_model` | AI Model (Gemini 1.5 Flash/Pro) |
+| `gemini_prompt` | Custom system prompt for analysis |
+
+## AI Analysis
+The plugin integrates with Google Gemini to audit questions for quality:
+- **Bulk Selection**: Select multiple questions in the Questions tab.
+- **AI Review**: Click "Analyze with AI" to detect spelling errors, missing feedback, or clarity issues.
+- **One-click Fix**: Apply suggested changes individually or in bulk.
+
 
 ## Export/Import
 

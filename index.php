@@ -37,7 +37,9 @@ switch ($tab) {
     case 'questions':
         $categoryid = optional_param('cat', 0, PARAM_INT);
         $recurse = optional_param('recurse', 0, PARAM_BOOL);
-        echo $output->render_questions_view($categoryid, $recurse);
+        $page = optional_param('page', 0, PARAM_INT);
+        $perpage = optional_param('perpage', 20, PARAM_INT);
+        echo $output->render_questions_view($categoryid, $recurse, $page, $perpage);
         break;
     case 'dashboard':
     default:

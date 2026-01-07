@@ -16,7 +16,7 @@ class question_editor extends external_api {
     public static function save_question_field_parameters() {
         return new external_function_parameters([
             'questionid' => new external_value(PARAM_INT, 'The question ID'),
-            'field' => new external_value(PARAM_ALPHA, 'The field to update (e.g. questiontext)'),
+            'field' => new external_value(PARAM_NOTAGS, 'The field to update (e.g. questiontext)'),
             'value' => new external_value(PARAM_RAW, 'The new value'),
         ]);
     }

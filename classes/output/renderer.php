@@ -94,14 +94,21 @@ class renderer extends plugin_renderer_base {
      * @param bool $recurse Whether to include subcategories.
      * @return string
      */
-    public function render_questions_view(int $categoryid, bool $recurse = false): string {
-        global $DB;
+    /**
+     * Render the questions table view.
+     *
+     * @param int $categoryid The selected category ID.
+     * @param bool $recurse Whether to include subcategories.
+     * @param int $page Current page number (0-based).
+     * @param int $perpage Number of items per page.
+     * @return string
+     */
+    public function render_questions_view(int $categoryid, bool $recurse = false, int $page = 0, int $perpage = 20): string {
+        global $DB, $CFG;
         
         // Fetch categories.
         $categories = $DB->get_records('question_categories', null, 'parent ASC, sortorder ASC, name ASC', 'id, name, parent');
         $catoptions = [];
-        // Flatten with indentation could be better, but for now simple listing.
-        // A proper walker would be ideal, but simplifying for brevity.
         foreach ($categories as $cat) {
             $catoptions[] = [
                 'id' => $cat->id,
@@ -112,19 +119,40 @@ class renderer extends plugin_renderer_base {
 
         // Fetch questions.
         $questions = [];
+        $totalcount = 0;
+        $paginationHtml = '';
+
         if ($categoryid) {
             $catids = [$categoryid];
             if ($recurse) {
                 // Simple recursion to find children (optimize with subquery in real prod)
                 $subcats = $DB->get_records('question_categories', ['parent' => $categoryid]);
-                // This is a shallow recurse for demo. Real moodle uses question_category_object::get_subcategories
                 foreach ($subcats as $sub) {
                     $catids[] = $sub->id;
                 }
             }
             
             list($insql, $inparams) = $DB->get_in_or_equal($catids);
-            $questions = $DB->get_records_select('question', "category $insql", $inparams);
+            
+            // Count total for pagination.
+            $totalcount = $DB->count_records_select('question', "category $insql", $inparams);
+            
+            // Get paged records.
+            if ($perpage > 0) {
+                $questions = $DB->get_records_select('question', "category $insql", $inparams, 'id ASC', '*', $page * $perpage, $perpage);
+                
+                // Render pagination bar.
+                $baseurl = new \moodle_url('/local/questions/index.php', [
+                    'tab' => 'questions', 
+                    'cat' => $categoryid, 
+                    'recurse' => $recurse,
+                    'perpage' => $perpage
+                ]);
+                $paginationHtml = $this->render(new \paging_bar($totalcount, $page, $perpage, $baseurl));
+            } else {
+                // Show all.
+                $questions = $DB->get_records_select('question', "category $insql", $inparams, 'id ASC');
+            }
         }
 
         $qdata = [];
@@ -153,12 +181,25 @@ class renderer extends plugin_renderer_base {
             ];
         }
 
+        // Per page options
+        $perpageoptions = [20, 50, 100, 0]; // 0 for All
+        $perpageview = [];
+        foreach ($perpageoptions as $opt) {
+            $perpageview[] = [
+                'value' => $opt,
+                'name' => $opt === 0 ? get_string('all', 'core') : $opt,
+                'selected' => $perpage == $opt
+            ];
+        }
+
         $data = [
             'options' => $catoptions,
             'hasquestions' => !empty($qdata),
             'questions' => $qdata,
             'selectedcategory' => $categoryid,
-            'recurse' => $recurse
+            'recurse' => $recurse,
+            'pagination' => $paginationHtml,
+            'perpageoptions' => $perpageview
         ];
 
         return $this->render_from_template('local_questions/questions_table', $data);

@@ -1,24 +1,42 @@
 <div class="questions-view">
-    <form class="form-inline mb-3">
-        <label class="mr-2" for="category-select">Select Category:</label>
-        <select class="custom-select mr-3" id="category-select" onchange="window.location.href='?tab=questions&cat='+this.value">
-            <option value="0">Choose...</option>
-            {{#options}}
-            <option value="{{id}}" {{#selected}}selected{{/selected}}>{{name}}</option>
-            {{/options}}
-        </select>
-        
-        <div class="custom-control custom-checkbox my-1 mr-sm-2">
-            <input type="checkbox" class="custom-control-input" id="recurse-check" {{#recurse}}checked{{/recurse}} onchange="var url = new URL(window.location.href); url.searchParams.set('recurse', this.checked ? 1 : 0); window.location.href = url.toString();">
-            <label class="custom-control-label" for="recurse-check">Include subcategories</label>
+    <form class="form-inline mb-3 justify-content-between">
+        <div class="d-flex align-items-center">
+            <label class="mr-2" for="category-select">Category:</label>
+            <select class="custom-select mr-3" id="category-select" onchange="window.location.href='?tab=questions&cat='+this.value">
+                <option value="0">Choose...</option>
+                {{#options}}
+                <option value="{{id}}" {{#selected}}selected{{/selected}}>{{name}}</option>
+                {{/options}}
+            </select>
+            
+            <div class="custom-control custom-checkbox mr-3">
+                <input type="checkbox" class="custom-control-input" id="recurse-check" {{#recurse}}checked{{/recurse}} onchange="var url = new URL(window.location.href); url.searchParams.set('recurse', this.checked ? 1 : 0); window.location.href = url.toString();">
+                <label class="custom-control-label" for="recurse-check">Subcategories</label>
+            </div>
+        </div>
+
+        <div class="d-flex align-items-center">
+             <label class="mr-2" for="perpage-select">Per page:</label>
+             <select class="custom-select" id="perpage-select" onchange="var url = new URL(window.location.href); url.searchParams.set('perpage', this.value); url.searchParams.set('page', 0); window.location.href = url.toString();">
+                {{#perpageoptions}}
+                <option value="{{value}}" {{#selected}}selected{{/selected}}>{{name}}</option>
+                {{/perpageoptions}}
+             </select>
         </div>
     </form>
 
     {{#hasquestions}}
+    <div class="mb-2">
+        {{{pagination}}}
+    </div>
+
     <div class="table-responsive">
         <table class="table table-bordered table-hover" id="questions-table">
             <thead class="thead-light">
                 <tr>
+                    <th scope="col" style="width: 40px; text-align: center;">
+                        <input type="checkbox" id="select-all-questions">
+                    </th>
                     <th scope="col" style="width: 50px;">#</th>
                     <th scope="col">Question Text</th>
                     <th scope="col">Answers</th>
@@ -29,6 +47,9 @@
             <tbody>
                 {{#questions}}
                 <tr data-id="{{id}}">
+                    <td class="text-center">
+                        <input type="checkbox" class="question-checkbox" name="qids[]" value="{{id}}">
+                    </td>
                     <td>{{id}}</td>
                     <td contenteditable="true" class="inplace-edit" data-field="questiontext">{{questiontext}}</td>
                     <td>
@@ -55,8 +76,17 @@
             </tbody>
         </table>
     </div>
-    <div class="mt-3">
-         <button id="batch-save-btn" class="btn btn-success" style="display:none;">Save All Changes</button>
+    
+    <div class="mt-2 mb-4 d-flex justify-content-between align-items-center">
+        <div>
+             {{{pagination}}}
+        </div>
+        <div>
+            <button id="batch-analyze-btn" class="btn btn-info text-white mr-2" disabled>
+                <i class="fa fa-magic"></i> Analyze with AI
+            </button>
+            <button id="batch-save-btn" class="btn btn-success" style="display:none;">Save All Changes</button>
+        </div>
     </div>
     {{/hasquestions}}
 
@@ -68,6 +98,8 @@
         <div class="alert alert-warning">Please select a category.</div>
         {{/selectedcategory}}
     {{/hasquestions}}
+
+    {{> local_questions/ai_review_modal }}
 </div>
 
 {{#js}}

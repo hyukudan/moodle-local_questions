@@ -15,12 +15,20 @@ $functions = [
         'type' => 'write',
         'ajax' => true,
     ],
+    'local_questions_analyze_batch' => [
+        'classname' => 'local_questions\\external\\ai_service',
+        'methodname' => 'analyze_batch',
+        'description' => 'Analyze a batch of questions using AI.',
+        'type' => 'write',
+        'ajax' => true,
+    ],
 ];
 
 $services = [
     'local_questions' => [
         'functions' => [
             'local_questions_save_question_field',
+            'local_questions_analyze_batch',
         ],
         'requiredcapability' => 'local/questions:view',
         'restrictedusers' => 0,

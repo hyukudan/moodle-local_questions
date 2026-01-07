@@ -1,0 +1,41 @@
+<div class="card m-2 border-warning">
+    <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center" id="heading-{{id}}">
+        <h6 class="mb-0">
+            Question ID: {{id}}
+            <span class="badge badge-dark ml-2">{{issueCount}} issues</span>
+        </h6>
+    </div>
+
+    <div class="collapse show">
+        <div class="card-body">
+            <ul class="list-group list-group-flush mb-3">
+                {{#issues}}
+                <li class="list-group-item list-group-item-warning"><i class="fa fa-exclamation-triangle mr-2"></i> {{.}}</li>
+                {{/issues}}
+            </ul>
+
+            <table class="table table-sm table-bordered">
+                <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>Original</th>
+                        <th>Suggested</th>
+                        <th style="width:80px;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#suggestions}}
+                    <tr class="suggestion-row" data-qid="{{id}}" data-field="{{field}}">
+                        <td><small class="text-muted">{{field}}</small></td>
+                        <td class="text-danger"><del>{{original}}</del></td>
+                        <td class="text-success">{{suggested}}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-success btn-apply-change">Apply</button>
+                        </td>
+                    </tr>
+                    {{/suggestions}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
