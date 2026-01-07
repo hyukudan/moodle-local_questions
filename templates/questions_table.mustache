@@ -80,12 +80,12 @@
                     </td>
                     <td>{{qtype}}</td>
                     <td class="text-nowrap">
-                        <a href="{{editurl}}" class="btn btn-sm btn-outline-secondary me-1" target="_blank" title="{{#str}}editinmoodle, local_questions{{/str}}">
-                            <i class="fa fa-pencil"></i>
-                        </a>
-                        <button class="btn btn-sm btn-primary save-row" style="display:none;" title="{{#str}}save, local_questions{{/str}}">
-                            <i class="fa fa-save"></i>
+                        <button class="btn btn-sm btn-success save-row" style="display:none;" title="{{#str}}save, local_questions{{/str}}">
+                            <i class="fa fa-save"></i> {{#str}}save, local_questions{{/str}}
                         </button>
+                        <a href="{{editurl}}" class="btn btn-sm btn-link text-muted p-0" target="_blank" title="{{#str}}editinmoodle, local_questions{{/str}}">
+                            <i class="fa fa-external-link"></i>
+                        </a>
                     </td>
                 </tr>
                 {{/questions}}

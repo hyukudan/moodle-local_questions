@@ -1,0 +1,93 @@
+/**
+ * Styles for local_questions plugin.
+ *
+ * @package    local_questions
+ * @copyright  2026 Sergio C.
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+/* Inline editable fields */
+.questions-view .inplace-edit {
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 1px dashed transparent;
+    transition: all 0.15s ease;
+    cursor: text;
+    min-height: 1.5em;
+}
+
+.questions-view .inplace-edit:hover {
+    background-color: #fff3cd;
+    border-color: #ffc107;
+}
+
+.questions-view .inplace-edit:focus {
+    background-color: #fff;
+    border-color: #0d6efd;
+    border-style: solid;
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* Show edit hint on hover */
+.questions-view td:has(.inplace-edit):hover::after {
+    content: none; /* Fallback - :has not supported everywhere */
+}
+
+/* Visual hint that row has unsaved changes */
+.questions-view tr:has(.save-row:not([style*="display: none"])) {
+    background-color: #fff3cd !important;
+}
+
+/* Save button styling */
+.questions-view .save-row {
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* Answer correct highlight */
+.questions-view .text-success.font-weight-bold {
+    font-weight: 600 !important;
+}
+
+/* General feedback box */
+.questions-view .border-start.border-info {
+    border-left-width: 3px !important;
+}
+
+/* Actions column */
+.questions-view .text-nowrap .btn {
+    padding: 0.25rem 0.5rem;
+}
+
+/* Checkbox alignment */
+#questions-table th:first-child,
+#questions-table td:first-child {
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* Table header sticky */
+#questions-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: #f8f9fa;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .questions-view .form-inline {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 0.5rem;
+    }
+
+    .questions-view .form-inline > div {
+        width: 100%;
+    }
+}
