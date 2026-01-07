@@ -272,9 +272,9 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
      * @param {number} questionId The question ID
      */
     const editQuestion = function(questionId) {
-        // Open Moodle question editor in new tab.
-        // Use question.php with courseid=1 (site) as it doesn't require cmid.
-        const url = M.cfg.wwwroot + '/question/question.php?id=' + questionId + '&courseid=1';
+        // Moodle 5.x requires cmid for direct question editing.
+        // Open our plugin's questions tab where inline editing is available.
+        const url = M.cfg.wwwroot + '/local/questions/index.php?tab=questions';
         window.open(url, '_blank');
     };
 

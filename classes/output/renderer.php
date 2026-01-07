@@ -221,9 +221,8 @@ class renderer extends plugin_renderer_base {
                     }
                 }
             }
-            // Use question.php which accepts courseid without requiring cmid.
-            $editurl = new \moodle_url('/question/question.php', [
-                'id' => $q->id,
+            // Moodle 5.x: question bank requires cmid. Link to question bank overview.
+            $editurl = new \moodle_url('/question/banks.php', [
                 'courseid' => $courseid,
             ]);
 
