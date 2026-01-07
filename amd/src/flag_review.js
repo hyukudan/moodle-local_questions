@@ -115,7 +115,11 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
         // Show modal with loading state.
         $('#flag-details-loading').removeClass('d-none');
         $('#flag-details-content').addClass('d-none');
-        $('#flag-details-modal').modal('show');
+
+        // Use Bootstrap 5 native API.
+        const modalEl = document.getElementById('flag-details-modal');
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modal.show();
 
         // Fetch details.
         Ajax.call([{
@@ -125,7 +129,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
             renderDetails(response);
         }).fail(function(error) {
             Notification.exception(error);
-            $('#flag-details-modal').modal('hide');
+            modal.hide();
         });
     };
 
@@ -280,7 +284,9 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
         }
 
         resetResolutionModal();
-        $('#flag-resolution-modal').modal('show');
+        // Use Bootstrap 5 native API.
+        const modalEl = document.getElementById('flag-resolution-modal');
+        bootstrap.Modal.getOrCreateInstance(modalEl).show();
     };
 
     /**
