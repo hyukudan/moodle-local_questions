@@ -66,6 +66,11 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
         $('#flag-resolution-modal').on('hidden.bs.modal', function() {
             resetResolutionModal();
         });
+
+        // Close modal buttons (manual handler for BS5 compatibility).
+        $(document).on('click', '#flag-details-modal .close-modal-btn', function() {
+            modalAction('flag-details-modal', 'hide');
+        });
     };
 
     /**
