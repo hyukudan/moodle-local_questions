@@ -107,6 +107,24 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
     };
 
     /**
+     * Show a Bootstrap modal (compatible with BS4 jQuery and BS5 native).
+     *
+     * @param {string} modalId The modal element ID
+     * @param {string} action 'show' or 'hide'
+     */
+    const modalAction = function(modalId, action) {
+        const modalEl = document.getElementById(modalId);
+        if (typeof window.bootstrap !== 'undefined' && window.bootstrap.Modal) {
+            // Bootstrap 5 native.
+            const modal = window.bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal[action]();
+        } else {
+            // Fallback to jQuery (Bootstrap 4 style).
+            $('#' + modalId).modal(action);
+        }
+    };
+
+    /**
      * Show flag details for a question.
      *
      * @param {number} questionId The question ID
@@ -116,10 +134,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
         $('#flag-details-loading').removeClass('d-none');
         $('#flag-details-content').addClass('d-none');
 
-        // Use Bootstrap 5 native API.
-        const modalEl = document.getElementById('flag-details-modal');
-        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-        modal.show();
+        modalAction('flag-details-modal', 'show');
 
         // Fetch details.
         Ajax.call([{
@@ -129,7 +144,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
             renderDetails(response);
         }).fail(function(error) {
             Notification.exception(error);
-            modal.hide();
+            modalAction('flag-details-modal', 'hide');
         });
     };
 
@@ -285,9 +300,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
         }
 
         resetResolutionModal();
-        // Use Bootstrap 5 native API.
-        const modalEl = document.getElementById('flag-resolution-modal');
-        bootstrap.Modal.getOrCreateInstance(modalEl).show();
+        modalAction('flag-resolution-modal', 'show');
     };
 
     /**
