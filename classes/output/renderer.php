@@ -145,27 +145,49 @@ class renderer extends plugin_renderer_base {
                     $catids[] = $sub->id;
                 }
             }
-            
-            list($insql, $inparams) = $DB->get_in_or_equal($catids);
-            
-            // Count total for pagination.
-            $totalcount = $DB->count_records_select('question', "category $insql", $inparams);
-            
+
+            list($insql, $inparams) = $DB->get_in_or_equal($catids, SQL_PARAMS_NAMED, 'cat');
+
+            // Moodle 4.x: question.category moved to question_bank_entries.questioncategoryid
+            // We need to JOIN through question_versions to get questions in a category.
+            $countsql = "SELECT COUNT(DISTINCT q.id)
+                           FROM {question} q
+                           JOIN {question_versions} qv ON qv.questionid = q.id
+                           JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid
+                          WHERE qbe.questioncategoryid $insql
+                            AND qv.status = 'ready'";
+
+            $totalcount = $DB->count_records_sql($countsql, $inparams);
+
+            // Build the main query for fetching questions.
+            $selectsql = "SELECT q.*
+                            FROM {question} q
+                            JOIN {question_versions} qv ON qv.questionid = q.id
+                            JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid
+                           WHERE qbe.questioncategoryid $insql
+                             AND qv.status = 'ready'
+                             AND qv.version = (
+                                 SELECT MAX(qv2.version)
+                                   FROM {question_versions} qv2
+                                  WHERE qv2.questionbankentryid = qv.questionbankentryid
+                             )
+                        ORDER BY q.id ASC";
+
             // Get paged records.
             if ($perpage > 0) {
-                $questions = $DB->get_records_select('question', "category $insql", $inparams, 'id ASC', '*', $page * $perpage, $perpage);
-                
+                $questions = $DB->get_records_sql($selectsql, $inparams, $page * $perpage, $perpage);
+
                 // Render pagination bar.
                 $baseurl = new \moodle_url('/local/questions/index.php', [
-                    'tab' => 'questions', 
-                    'cat' => $categoryid, 
+                    'tab' => 'questions',
+                    'cat' => $categoryid,
                     'recurse' => $recurse,
                     'perpage' => $perpage
                 ]);
                 $paginationHtml = $this->render(new \paging_bar($totalcount, $page, $perpage, $baseurl));
             } else {
                 // Show all.
-                $questions = $DB->get_records_select('question', "category $insql", $inparams, 'id ASC');
+                $questions = $DB->get_records_sql($selectsql, $inparams);
             }
         }
 
