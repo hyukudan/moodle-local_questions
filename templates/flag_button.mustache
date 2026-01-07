@@ -19,23 +19,21 @@
 <div class="local-questions-flag-container mt-2 mb-2">
     {{#alreadyflagged}}
     <button type="button"
-            class="btn btn-sm btn-warning local-questions-flag-btn disabled"
+            class="btn btn-sm btn-secondary local-questions-flag-btn disabled"
             data-questionid="{{questionid}}"
             disabled
             title="{{#str}}alreadyflagged, local_questions{{/str}}">
-        <i class="fa fa-flag"></i>
+        <i class="fa fa-check-circle"></i>
         <span class="ms-1">{{#str}}alreadyflagged, local_questions{{/str}}</span>
     </button>
     {{/alreadyflagged}}
     {{^alreadyflagged}}
     <button type="button"
-            class="btn btn-sm btn-outline-warning local-questions-flag-btn"
+            class="btn btn-sm btn-outline-danger local-questions-flag-btn"
             data-questionid="{{questionid}}"
-            data-bs-toggle="modal"
-            data-bs-target="#local-questions-flag-modal"
             title="{{#str}}reportquestion, local_questions{{/str}}">
-        <i class="fa fa-flag"></i>
-        <span class="ms-1">{{#str}}reportquestion, local_questions{{/str}}</span>
+        <i class="fa fa-exclamation-triangle"></i>
+        <span class="ms-1">{{#str}}reportquestion_short, local_questions{{/str}}</span>
     </button>
     {{/alreadyflagged}}
 </div>

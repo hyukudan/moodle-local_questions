@@ -6,7 +6,39 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Ajax, Notification, Str) {
+define(['jquery', 'core/ajax', 'core/notification', 'core/str'],
+function($, Ajax, Notification, Str) {
+
+    /**
+     * Show a toast notification using gamification toast with fallback.
+     *
+     * @param {Object} options Toast options
+     */
+    const showToast = function(options) {
+        // Try to load and use gamification toast at runtime.
+        require(['theme_remui/gamification_toast'], function(GamificationToast) {
+            if (GamificationToast && typeof GamificationToast.show === 'function') {
+                GamificationToast.show(options);
+            } else {
+                showFallbackNotification(options);
+            }
+        }, function() {
+            // Module not available, use fallback.
+            showFallbackNotification(options);
+        });
+    };
+
+    /**
+     * Show fallback Moodle notification.
+     *
+     * @param {Object} options Toast options
+     */
+    const showFallbackNotification = function(options) {
+        Notification.addNotification({
+            message: options.title + ': ' + options.message,
+            type: options.category === 'success' ? 'success' : 'info'
+        });
+    };
 
     /**
      * Strings cache.
@@ -71,6 +103,22 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
         $(document).on('click', '#flag-details-modal .close-modal-btn', function() {
             modalAction('flag-details-modal', 'hide');
         });
+
+        // Close resolution modal buttons.
+        $(document).on('click', '#flag-resolution-modal .close-resolution-btn', function() {
+            modalAction('flag-resolution-modal', 'hide');
+        });
+
+        // Close edit modal buttons.
+        $(document).on('click', '#flag-edit-modal .close-edit-btn', function() {
+            modalAction('flag-edit-modal', 'hide');
+        });
+
+        // Save edit button.
+        $(document).on('click', '#save-edit-btn', function(e) {
+            e.preventDefault();
+            saveQuestionEdit();
+        });
     };
 
     /**
@@ -83,12 +131,20 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
             {key: 'resolving', component: 'local_questions'},
             {key: 'dismissing', component: 'local_questions'},
             {key: 'nocomment', component: 'local_questions'},
+            {key: 'save', component: 'core'},
+            {key: 'saving', component: 'local_questions'},
+            {key: 'savechanges', component: 'local_questions'},
+            {key: 'questionsaved', component: 'local_questions'},
         ]).done(function(s) {
             strings.resolve = s[0];
             strings.dismiss = s[1];
             strings.resolving = s[2];
             strings.dismissing = s[3];
             strings.nocomment = s[4];
+            strings.save = s[5];
+            strings.saving = s[6];
+            strings.savechanges = s[7];
+            strings.questionsaved = s[8];
         });
     };
 
@@ -267,15 +323,172 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
     };
 
     /**
-     * Open question editor.
+     * Open question editor modal.
      *
      * @param {number} questionId The question ID
      */
     const editQuestion = function(questionId) {
-        // Moodle 5.x requires cmid for direct question editing.
-        // Open our plugin's questions tab where inline editing is available.
-        const url = M.cfg.wwwroot + '/local/questions/index.php?tab=questions';
-        window.open(url, '_blank');
+        // Show modal with loading state.
+        $('#edit-loading').removeClass('d-none');
+        $('#edit-content').addClass('d-none');
+        $('#edit-success-message, #edit-error-message').addClass('d-none');
+        $('#save-edit-btn').prop('disabled', false);
+
+        modalAction('flag-edit-modal', 'show');
+
+        // Fetch question data using existing get_flag_details service.
+        Ajax.call([{
+            methodname: 'local_questions_get_flag_details',
+            args: {questionid: questionId}
+        }])[0].done(function(response) {
+            loadEditModal(response);
+        }).fail(function(error) {
+            Notification.exception(error);
+            modalAction('flag-edit-modal', 'hide');
+        });
+    };
+
+    /**
+     * Load question data into edit modal.
+     *
+     * @param {Object} data The question data
+     */
+    const loadEditModal = function(data) {
+        // Store question ID.
+        $('#edit-questionid').val(data.questionid);
+
+        // Set question name (readonly).
+        $('#edit-questionname').text(data.questionname);
+
+        // Set question text (editable).
+        $('#edit-questiontext').val(stripHtml(data.questiontext));
+
+        // Set general feedback.
+        $('#edit-generalfeedback').val(stripHtml(data.generalfeedback || ''));
+
+        // Populate answers.
+        const $container = $('#edit-answers-container').empty();
+        const template = document.getElementById('edit-answer-template');
+        const labels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+
+        if (data.answers && data.answers.length > 0) {
+            data.answers.forEach(function(answer, index) {
+                const $item = $(template.content.cloneNode(true));
+                $item.find('.answer-item').attr('data-answerid', answer.id);
+                $item.find('.answer-label').text(labels[index] || (index + 1));
+                $item.find('.correct-answer-radio').val(answer.id);
+                if (answer.iscorrect) {
+                    $item.find('.correct-answer-radio').prop('checked', true);
+                }
+                $item.find('.answer-text').val(stripHtml(answer.answer));
+                $item.find('.answer-feedback').val(stripHtml(answer.feedback || ''));
+                $container.append($item);
+            });
+        }
+
+        // Hide loading, show content.
+        $('#edit-loading').addClass('d-none');
+        $('#edit-content').removeClass('d-none');
+    };
+
+    /**
+     * Save question edits - all fields.
+     */
+    const saveQuestionEdit = function() {
+        const questionId = $('#edit-questionid').val();
+        const questionText = $('#edit-questiontext').val().trim();
+        const generalFeedback = $('#edit-generalfeedback').val().trim();
+
+        if (!questionText) {
+            $('#edit-questiontext').addClass('is-invalid');
+            return;
+        }
+
+        $('#edit-questiontext').removeClass('is-invalid');
+        $('#save-edit-btn').prop('disabled', true).html('<i class="fa fa-spinner fa-spin me-1"></i>' + (strings.saving || 'Guardando...'));
+
+        // Build array of all save calls.
+        const calls = [];
+
+        // Question text.
+        calls.push({
+            methodname: 'local_questions_save_question_field',
+            args: {questionid: parseInt(questionId), field: 'questiontext', value: questionText}
+        });
+
+        // General feedback.
+        calls.push({
+            methodname: 'local_questions_save_question_field',
+            args: {questionid: parseInt(questionId), field: 'generalfeedback', value: generalFeedback}
+        });
+
+        // Answers.
+        const selectedCorrectId = $('input[name="correct-answer"]:checked').val();
+        $('#edit-answers-container .answer-item').each(function() {
+            const $item = $(this);
+            const answerId = $item.data('answerid');
+            const answerText = $item.find('.answer-text').val().trim();
+            const answerFeedback = $item.find('.answer-feedback').val().trim();
+
+            // Save answer text.
+            calls.push({
+                methodname: 'local_questions_save_question_field',
+                args: {questionid: parseInt(questionId), field: 'answer:' + answerId, value: answerText}
+            });
+
+            // Save answer feedback.
+            calls.push({
+                methodname: 'local_questions_save_question_field',
+                args: {questionid: parseInt(questionId), field: 'feedback:' + answerId, value: answerFeedback}
+            });
+        });
+
+        // If correct answer changed, update fractions.
+        if (selectedCorrectId) {
+            calls.push({
+                methodname: 'local_questions_save_question_field',
+                args: {questionid: parseInt(questionId), field: 'correctanswer', value: selectedCorrectId}
+            });
+        }
+
+        // Execute all calls.
+        const promises = Ajax.call(calls);
+        $.when.apply($, promises).then(function() {
+            // Close modal immediately.
+            modalAction('flag-edit-modal', 'hide');
+
+            // Show success toast.
+            showToast({
+                type: 'info',
+                title: '✏️ Pregunta actualizada',
+                message: strings.questionsaved || 'Pregunta guardada correctamente.',
+                category: 'success',
+                duration: 3000,
+                sound: false
+            });
+
+            // Update the table row preview.
+            updateTablePreview(questionId, questionText);
+        }).fail(function(error) {
+            $('#edit-error-text').text(error.message || 'Error al guardar');
+            $('#edit-error-message').removeClass('d-none');
+            $('#save-edit-btn').prop('disabled', false).html('<i class="fa fa-save me-1"></i>' + (strings.savechanges || 'Guardar cambios'));
+        });
+    };
+
+    /**
+     * Update table row with new question text preview.
+     *
+     * @param {number} questionId The question ID
+     * @param {string} newText The new question text
+     */
+    const updateTablePreview = function(questionId, newText) {
+        const $row = $('#flags-table tbody tr[data-questionid="' + questionId + '"]');
+        if ($row.length) {
+            // Truncate for preview.
+            const preview = newText.length > 100 ? newText.substring(0, 100) + '...' : newText;
+            $row.find('.text-truncate').text(preview);
+        }
     };
 
     /**
@@ -293,14 +506,14 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
         const $typeGroup = $('#resolution-type-group');
 
         if (action === 'resolve') {
-            $header.removeClass('bg-danger').addClass('bg-success');
-            $('#flag-resolution-title').html('<i class="fa fa-check mr-2"></i>' + (strings.resolve || 'Resolver'));
-            $submitBtn.removeClass('btn-danger').addClass('btn-success').text(strings.resolve || 'Resolver');
+            $header.removeClass('bg-danger text-dark').addClass('bg-success text-white');
+            $('#flag-resolution-title').html('<i class="fa fa-check me-2"></i>' + (strings.resolve || 'Resolver'));
+            $submitBtn.removeClass('btn-danger').addClass('btn-success text-white').text(strings.resolve || 'Resolver');
             $typeGroup.show();
         } else {
-            $header.removeClass('bg-success').addClass('bg-danger');
-            $('#flag-resolution-title').html('<i class="fa fa-times mr-2"></i>' + (strings.dismiss || 'Descartar'));
-            $submitBtn.removeClass('btn-success').addClass('btn-danger').text(strings.dismiss || 'Descartar');
+            $header.removeClass('bg-success').addClass('bg-danger text-white');
+            $('#flag-resolution-title').html('<i class="fa fa-times me-2"></i>' + (strings.dismiss || 'Descartar'));
+            $submitBtn.removeClass('btn-success').addClass('btn-danger text-white').text(strings.dismiss || 'Descartar');
             $typeGroup.hide();
         }
 
@@ -355,13 +568,21 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
             }
         }])[0].done(function(response) {
             if (response.success) {
-                $('#resolution-success-text').text(response.message);
-                $('#resolution-success-message').removeClass('d-none');
+                // Close modal immediately.
+                modalAction('flag-resolution-modal', 'hide');
 
-                // Reload page after delay to show updated data.
-                setTimeout(function() {
-                    window.location.reload();
-                }, 1500);
+                // Show toast notification.
+                showToast({
+                    type: 'info',
+                    title: action === 'resolve' ? '✅ Reporte resuelto' : '❌ Reporte descartado',
+                    message: response.message,
+                    category: action === 'resolve' ? 'success' : 'danger',
+                    duration: 4000,
+                    sound: false
+                });
+
+                // Update the row in the table.
+                updateRowStatus(questionId, action);
             } else {
                 $('#resolution-error-text').text(response.message);
                 $('#resolution-error-message').removeClass('d-none');
@@ -371,6 +592,63 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
             Notification.exception(error);
             $('#submit-resolution-btn').prop('disabled', false);
         });
+    };
+
+    /**
+     * Update row status after resolution without page reload.
+     *
+     * @param {number} questionId The question ID
+     * @param {string} action The action taken (resolve/dismiss)
+     */
+    const updateRowStatus = function(questionId, action) {
+        const $row = $('#flags-table tbody tr[data-questionid="' + questionId + '"]');
+        if (!$row.length) {
+            return;
+        }
+
+        const newStatus = action === 'resolve' ? 'resolved' : 'dismissed';
+        $row.attr('data-status', newStatus);
+
+        // Update status badge.
+        const badges = {
+            'resolved': '<span class="badge bg-success">Resuelta</span>',
+            'dismissed': '<span class="badge bg-dark">Descartada</span>'
+        };
+        $row.find('td:eq(4)').html(badges[newStatus]);
+
+        // Hide action buttons (resolve/dismiss) since it's now resolved/dismissed.
+        $row.find('.resolve-btn, .dismiss-btn').hide();
+
+        // Update filter counts.
+        updateFilterCounts(action);
+
+        // If current filter is 'pending' or 'reviewing', hide this row.
+        const activeFilter = $('.filter-btn.active').data('filter');
+        if (activeFilter === 'pending' || activeFilter === 'reviewing') {
+            $row.fadeOut(300);
+        }
+    };
+
+    /**
+     * Update filter button counts after resolution.
+     *
+     * @param {string} action The action taken
+     */
+    const updateFilterCounts = function(action) {
+        // Decrement pending count.
+        const $pendingBadge = $('.filter-btn[data-filter="pending"] .badge');
+        let pendingCount = parseInt($pendingBadge.text()) || 0;
+        if (pendingCount > 0) {
+            pendingCount--;
+            $pendingBadge.text(pendingCount);
+        }
+
+        // Increment resolved/dismissed count.
+        const targetFilter = action === 'resolve' ? 'resolved' : 'dismissed';
+        const $targetBadge = $('.filter-btn[data-filter="' + targetFilter + '"] .badge');
+        let targetCount = parseInt($targetBadge.text()) || 0;
+        targetCount++;
+        $targetBadge.text(targetCount);
     };
 
     return {

@@ -46,20 +46,51 @@ class question_editor extends external_api {
         } else if (preg_match('/^(answer|feedback):(\d+)$/', $params['field'], $matches)) {
             $type = $matches[1];
             $answerid = $matches[2];
-            
+
             // Validate answer belongs to question.
             $answer = $DB->get_record('question_answers', ['id' => $answerid, 'question' => $params['questionid']], '*', MUST_EXIST);
-            
+
             $aUpdate = new \stdClass();
             $aUpdate->id = $answer->id;
             $aUpdate->{$type} = $params['value'];
             $DB->update_record('question_answers', $aUpdate);
-            
-            // Touch question modification time too
+
+            // Touch question modification time too.
             $qUpdate = new \stdClass();
             $qUpdate->id = $params['questionid'];
+            $qUpdate->timemodified = time();
+            $qUpdate->modifiedby = $USER->id;
             $DB->update_record('question', $qUpdate);
-            
+
+        } else if ($params['field'] === 'correctanswer') {
+            // Change which answer is correct.
+            // Set the selected answer to fraction 1.0 and all others to -0.3333333.
+            $correctid = (int)$params['value'];
+
+            // Validate answer belongs to question.
+            $DB->get_record('question_answers', ['id' => $correctid, 'question' => $params['questionid']], 'id', MUST_EXIST);
+
+            // Get all answers for this question.
+            $answers = $DB->get_records('question_answers', ['question' => $params['questionid']]);
+
+            foreach ($answers as $answer) {
+                $aUpdate = new \stdClass();
+                $aUpdate->id = $answer->id;
+                if ($answer->id == $correctid) {
+                    $aUpdate->fraction = 1.0;
+                } else {
+                    $aUpdate->fraction = -0.3333333;
+                }
+                $DB->update_record('question_answers', $aUpdate);
+            }
+
+            // Touch question modification time.
+            $qUpdate = new \stdClass();
+            $qUpdate->id = $params['questionid'];
+            $qUpdate->timemodified = time();
+            $qUpdate->modifiedby = $USER->id;
+            $DB->update_record('question', $qUpdate);
+
         } else {
              throw new \moodle_exception('invalidfield', 'local_questions');
         }

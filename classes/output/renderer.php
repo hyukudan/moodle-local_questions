@@ -119,78 +119,75 @@ class renderer extends plugin_renderer_base {
      */
     public function render_questions_view(int $categoryid, bool $recurse = false, int $page = 0, int $perpage = 20): string {
         global $DB, $CFG;
-        
-        // Fetch categories.
-        $categories = $DB->get_records('question_categories', null, 'parent ASC, sortorder ASC, name ASC', 'id, name, parent');
-        $catoptions = [];
-        foreach ($categories as $cat) {
-            $catoptions[] = [
-                'id' => $cat->id,
-                'name' => format_string($cat->name),
-                'selected' => $cat->id == $categoryid
-            ];
-        }
+
+        // Fetch categories with hierarchy and "All" option.
+        $catoptions = $this->build_category_options($categoryid, true);
 
         // Fetch questions.
         $questions = [];
         $totalcount = 0;
         $paginationHtml = '';
+        $inparams = [];
 
-        if ($categoryid) {
+        // Build WHERE clause for category filtering.
+        if ($categoryid > 0) {
             $catids = [$categoryid];
             if ($recurse) {
-                // Simple recursion to find children (optimize with subquery in real prod)
+                // Simple recursion to find children.
                 $subcats = $DB->get_records('question_categories', ['parent' => $categoryid]);
                 foreach ($subcats as $sub) {
                     $catids[] = $sub->id;
                 }
             }
-
             list($insql, $inparams) = $DB->get_in_or_equal($catids, SQL_PARAMS_NAMED, 'cat');
+            $categorywhere = "AND qbe.questioncategoryid $insql";
+        } else {
+            // categoryid == 0 means all categories.
+            $categorywhere = '';
+        }
 
-            // Moodle 4.x: question.category moved to question_bank_entries.questioncategoryid
-            // We need to JOIN through question_versions to get questions in a category.
-            $countsql = "SELECT COUNT(DISTINCT q.id)
-                           FROM {question} q
-                           JOIN {question_versions} qv ON qv.questionid = q.id
-                           JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid
-                          WHERE qbe.questioncategoryid $insql
-                            AND qv.status = 'ready'";
+        // Moodle 4.x: question.category moved to question_bank_entries.questioncategoryid
+        // We need to JOIN through question_versions to get questions in a category.
+        $countsql = "SELECT COUNT(DISTINCT q.id)
+                       FROM {question} q
+                       JOIN {question_versions} qv ON qv.questionid = q.id
+                       JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid
+                      WHERE qv.status = 'ready'
+                        $categorywhere";
 
-            $totalcount = $DB->count_records_sql($countsql, $inparams);
+        $totalcount = $DB->count_records_sql($countsql, $inparams);
 
-            // Build the main query for fetching questions.
-            // Include category context to build proper edit URLs.
-            $selectsql = "SELECT q.*, qbe.questioncategoryid, qc.contextid
-                            FROM {question} q
-                            JOIN {question_versions} qv ON qv.questionid = q.id
-                            JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid
-                            JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
-                           WHERE qbe.questioncategoryid $insql
-                             AND qv.status = 'ready'
-                             AND qv.version = (
-                                 SELECT MAX(qv2.version)
-                                   FROM {question_versions} qv2
-                                  WHERE qv2.questionbankentryid = qv.questionbankentryid
-                             )
-                        ORDER BY q.id ASC";
+        // Build the main query for fetching questions.
+        // Include category context to build proper edit URLs.
+        $selectsql = "SELECT q.*, qbe.questioncategoryid, qc.contextid
+                        FROM {question} q
+                        JOIN {question_versions} qv ON qv.questionid = q.id
+                        JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid
+                        JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
+                       WHERE qv.status = 'ready'
+                         $categorywhere
+                         AND qv.version = (
+                             SELECT MAX(qv2.version)
+                               FROM {question_versions} qv2
+                              WHERE qv2.questionbankentryid = qv.questionbankentryid
+                         )
+                    ORDER BY q.id ASC";
 
-            // Get paged records.
-            if ($perpage > 0) {
-                $questions = $DB->get_records_sql($selectsql, $inparams, $page * $perpage, $perpage);
+        // Get paged records.
+        if ($perpage > 0) {
+            $questions = $DB->get_records_sql($selectsql, $inparams, $page * $perpage, $perpage);
 
-                // Render pagination bar.
-                $baseurl = new \moodle_url('/local/questions/index.php', [
-                    'tab' => 'questions',
-                    'cat' => $categoryid,
-                    'recurse' => $recurse,
-                    'perpage' => $perpage
-                ]);
-                $paginationHtml = $this->render(new \paging_bar($totalcount, $page, $perpage, $baseurl));
-            } else {
-                // Show all.
-                $questions = $DB->get_records_sql($selectsql, $inparams);
-            }
+            // Render pagination bar.
+            $baseurl = new \moodle_url('/local/questions/index.php', [
+                'tab' => 'questions',
+                'cat' => $categoryid,
+                'recurse' => $recurse,
+                'perpage' => $perpage
+            ]);
+            $paginationHtml = $this->render(new \paging_bar($totalcount, $page, $perpage, $baseurl));
+        } else {
+            // Show all.
+            $questions = $DB->get_records_sql($selectsql, $inparams);
         }
 
         $qdata = [];
@@ -274,16 +271,8 @@ class renderer extends plugin_renderer_base {
     public function render_export_form(): string {
         global $DB;
 
-        // Fetch categories.
-        $categories = $DB->get_records('question_categories', null, 'parent ASC, sortorder ASC, name ASC', 'id, name, parent');
-        $catoptions = [];
-        foreach ($categories as $cat) {
-            $catoptions[] = [
-                'id' => $cat->id,
-                'name' => format_string($cat->name),
-                'selected' => false
-            ];
-        }
+        // Fetch categories with hierarchy and "All" option.
+        $catoptions = $this->build_category_options(0, true);
 
         // Get available question types.
         $qtypes = \question_bank::get_creatable_qtypes();
@@ -315,18 +304,8 @@ class renderer extends plugin_renderer_base {
      * @return string
      */
     public function render_import_form(int $categoryid = 0, ?array $preview = null, ?int $draftid = null, ?array $results = null): string {
-        global $DB;
-
-        // Fetch categories.
-        $categories = $DB->get_records('question_categories', null, 'parent ASC, sortorder ASC, name ASC', 'id, name, parent');
-        $catoptions = [];
-        foreach ($categories as $cat) {
-            $catoptions[] = [
-                'id' => $cat->id,
-                'name' => format_string($cat->name),
-                'selected' => $cat->id == $categoryid
-            ];
-        }
+        // Fetch categories with hierarchy (no "All" option for import - need target category).
+        $catoptions = $this->build_category_options($categoryid, false);
 
         $data = [
             'categories' => $catoptions,
@@ -419,6 +398,78 @@ class renderer extends plugin_renderer_base {
         ];
 
         return $this->render_from_template('local_questions/flags_tab', $data);
+    }
+
+    /**
+     * Build hierarchical category options with indentation.
+     *
+     * @param int $selectedid Currently selected category ID.
+     * @param bool $includeall Whether to include "All categories" option.
+     * @return array Array of category options with 'id', 'name', 'selected'.
+     */
+    private function build_category_options(int $selectedid = 0, bool $includeall = false): array {
+        global $DB;
+
+        // Fetch all categories.
+        $categories = $DB->get_records('question_categories', null, 'parent ASC, sortorder ASC, name ASC', 'id, name, parent');
+
+        // Build tree structure.
+        $tree = [];
+        $lookup = [];
+        foreach ($categories as $cat) {
+            $lookup[$cat->id] = [
+                'id' => $cat->id,
+                'name' => format_string($cat->name),
+                'parent' => $cat->parent,
+                'children' => []
+            ];
+        }
+
+        // Link children to parents.
+        foreach ($lookup as $id => &$cat) {
+            if ($cat['parent'] && isset($lookup[$cat['parent']])) {
+                $lookup[$cat['parent']]['children'][] = &$cat;
+            } else {
+                $tree[] = &$cat;
+            }
+        }
+        unset($cat);
+
+        // Flatten with indentation.
+        $options = [];
+        if ($includeall) {
+            $options[] = [
+                'id' => 0,
+                'name' => get_string('allcategories', 'local_questions'),
+                'selected' => $selectedid == 0
+            ];
+        }
+
+        $this->flatten_category_tree($tree, $options, 0, $selectedid);
+
+        return $options;
+    }
+
+    /**
+     * Recursively flatten category tree with indentation.
+     *
+     * @param array $tree The category tree.
+     * @param array &$options Reference to options array to populate.
+     * @param int $depth Current depth for indentation.
+     * @param int $selectedid Selected category ID.
+     */
+    private function flatten_category_tree(array $tree, array &$options, int $depth, int $selectedid): void {
+        foreach ($tree as $cat) {
+            $indent = str_repeat('— ', $depth);
+            $options[] = [
+                'id' => $cat['id'],
+                'name' => $indent . $cat['name'],
+                'selected' => $cat['id'] == $selectedid
+            ];
+            if (!empty($cat['children'])) {
+                $this->flatten_category_tree($cat['children'], $options, $depth + 1, $selectedid);
+            }
+        }
     }
 
     /**

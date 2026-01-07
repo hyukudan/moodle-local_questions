@@ -35,16 +35,30 @@ class question_io {
             $catids = array_merge($catids, self::get_subcategory_ids($categoryid));
         }
 
+        // Moodle 4.0+ uses question_bank_entries for category relationship.
+        // We need to join through question_versions to get questions by category.
         list($insql, $inparams) = $DB->get_in_or_equal($catids);
-        $where = "category $insql";
-        
+
+        $sql = "SELECT q.*
+                  FROM {question} q
+                  JOIN {question_versions} qv ON qv.questionid = q.id
+                  JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid
+                 WHERE qbe.questioncategoryid $insql
+                   AND qv.version = (
+                       SELECT MAX(qv2.version)
+                         FROM {question_versions} qv2
+                        WHERE qv2.questionbankentryid = qv.questionbankentryid
+                   )";
+
         // Apply qtype filter if set.
         if (!empty($filters['qtype'])) {
-            $where .= " AND qtype = ?";
+            $sql .= " AND q.qtype = ?";
             $inparams[] = $filters['qtype'];
         }
 
-        $questions = $DB->get_records_select('question', $where, $inparams, 'id ASC');
+        $sql .= " ORDER BY q.id ASC";
+
+        $questions = $DB->get_records_sql($sql, $inparams);
 
         if (empty($questions)) {
             return ['data' => '', 'count' => 0];
@@ -149,9 +163,8 @@ class question_io {
                     continue;
                 }
 
-                // Create question.
+                // Create question (Moodle 4.0+ structure).
                 $question = new \stdClass();
-                $question->category = $categoryid;
                 $question->name = $row[$headerMap['name']];
                 $question->questiontext = $row[$headerMap['questiontext']];
                 $question->questiontextformat = FORMAT_HTML;
@@ -166,6 +179,21 @@ class question_io {
                 $question->modifiedby = $USER->id;
 
                 $questionid = $DB->insert_record('question', $question);
+
+                // Create question_bank_entry linking to category.
+                $entry = new \stdClass();
+                $entry->questioncategoryid = $categoryid;
+                $entry->idnumber = null;
+                $entry->ownerid = $USER->id;
+                $entryid = $DB->insert_record('question_bank_entries', $entry);
+
+                // Create question_version linking question to entry.
+                $version = new \stdClass();
+                $version->questionbankentryid = $entryid;
+                $version->questionid = $questionid;
+                $version->version = 1;
+                $version->status = 'ready';
+                $DB->insert_record('question_versions', $version);
 
                 // Create answers if present.
                 if (!empty($row[$headerMap['answers']])) {

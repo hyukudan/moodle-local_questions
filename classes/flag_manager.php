@@ -142,7 +142,42 @@ class flag_manager {
         ]);
         $event->trigger();
 
+        // Notify reviewers about the new flag.
+        self::notify_reviewers($questionid);
+
         return $flagid;
+    }
+
+    /**
+     * Notify users with reviewflags capability about a new flag.
+     *
+     * @param int $questionid The flagged question ID
+     */
+    private static function notify_reviewers(int $questionid): void {
+        $context = \context_system::instance();
+
+        // Get users with the reviewflags capability.
+        $reviewers = get_users_by_capability($context, 'local/questions:reviewflags', 'u.id', '', '', 50);
+
+        // Also include site admins (they have all capabilities but aren't returned by get_users_by_capability).
+        $admins = get_admins();
+
+        // Merge and deduplicate.
+        $notifyids = [];
+        foreach ($reviewers as $reviewer) {
+            $notifyids[$reviewer->id] = true;
+        }
+        foreach ($admins as $admin) {
+            $notifyids[$admin->id] = true;
+        }
+
+        if (empty($notifyids)) {
+            return;
+        }
+
+        foreach (array_keys($notifyids) as $userid) {
+            notification\flag_notification::send_new_flag($userid, $questionid);
+        }
     }
 
     /**

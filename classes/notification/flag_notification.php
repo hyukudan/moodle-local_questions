@@ -38,6 +38,7 @@ class flag_notification {
         $a = new \stdClass();
         $a->questionname = $question->name;
         $a->questionid = $question->id;
+        $a->questionpreview = self::get_question_preview($question);
         $a->feedback = $feedback;
         $a->resolution = get_string('resolution_' . $resolution, 'local_questions');
 
@@ -124,9 +125,40 @@ class flag_notification {
         $html = nl2br(s($text));
 
         // Add a styled container.
-        return '<div style="font-family: Arial, sans-serif; padding: 15px; background: #f5f5f5; border-radius: 5px;">'
-             . '<h3 style="color: #333; margin-top: 0;">' . s($a->questionname) . '</h3>'
-             . '<p>' . $html . '</p>'
-             . '</div>';
+        $output = '<div style="font-family: Arial, sans-serif; padding: 15px; background: #f5f5f5; border-radius: 5px;">';
+        $output .= '<h3 style="color: #333; margin-top: 0;">' . s($a->questionname) . '</h3>';
+        if (!empty($a->questionpreview)) {
+            $output .= '<p style="color: #666; font-style: italic; border-left: 3px solid #ccc; padding-left: 10px; margin: 10px 0;">'
+                     . s($a->questionpreview) . '</p>';
+        }
+        $output .= '<p>' . $html . '</p>';
+        $output .= '</div>';
+
+        return $output;
+    }
+
+    /**
+     * Get a preview of the question text (truncated).
+     *
+     * @param \stdClass $question The question object
+     * @return string Truncated preview
+     */
+    private static function get_question_preview(\stdClass $question): string {
+        if (empty($question->questiontext)) {
+            return '';
+        }
+
+        // Strip HTML and get plain text.
+        $text = strip_tags($question->questiontext);
+        $text = html_entity_decode($text, ENT_QUOTES, 'UTF-8');
+        $text = preg_replace('/\s+/', ' ', $text);
+        $text = trim($text);
+
+        // Truncate to ~150 chars.
+        if (strlen($text) > 150) {
+            $text = substr($text, 0, 147) . '...';
+        }
+
+        return $text;
     }
 }

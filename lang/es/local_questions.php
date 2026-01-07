@@ -33,6 +33,7 @@ $string['import'] = 'Importar';
 
 // Questions table
 $string['category'] = 'Categoría';
+$string['allcategories'] = 'Todas las categorías';
 $string['subcategories'] = 'Subcategorías';
 $string['perpage'] = 'Por página';
 $string['questiontext'] = 'Texto de la pregunta';
@@ -132,17 +133,23 @@ $string['resolution_duplicate'] = 'Reporte duplicado';
 $string['resolution_dismissed'] = 'Reporte descartado';
 
 // Student UI
-$string['reportquestion'] = 'Reportar pregunta';
-$string['flagmodal_intro'] = '¿Has detectado un problema con esta pregunta? Ayúdanos a mejorar reportándolo aquí. Tu feedback será revisado por el equipo docente.';
-$string['reason'] = 'Motivo del reporte';
-$string['selectreason'] = 'Selecciona un motivo...';
-$string['reasonrequired'] = 'Por favor selecciona un motivo';
-$string['comment'] = 'Comentario (opcional)';
-$string['commentplaceholder'] = 'Describe el problema que has encontrado...';
-$string['commenthelp'] = 'Proporciona detalles adicionales que ayuden a entender el problema.';
+$string['reportquestion'] = 'Reportar pregunta como incorrecta';
+$string['reportquestion_short'] = 'Reportar error';
+$string['flagconfirm_title'] = '¿Estás seguro?';
+$string['flagconfirm_warning'] = 'Estás a punto de notificar que hay un <strong>error en esta pregunta</strong> (enunciado incorrecto, respuesta errónea, normativa desactualizada, etc.).<br><br><strong>Esto NO es para dudas sobre el contenido de la pregunta</strong>, que deberás consultar directamente con el profesor del curso.';
+$string['flagconfirm_yes'] = 'Sí, hay un error';
+$string['flagconfirm_no'] = 'Cancelar';
+$string['flagmodal_intro'] = 'Indica el tipo de error y proporciona detalles para ayudarnos a corregirlo.';
+$string['reason'] = 'Tipo de error';
+$string['selectreason'] = 'Selecciona el tipo de error...';
+$string['reasonrequired'] = 'Por favor selecciona el tipo de error';
+$string['comment'] = 'Descripción del error (opcional)';
+$string['commentplaceholder'] = 'Describe el error que has encontrado...';
+$string['commenthelp'] = 'Cuantos más detalles proporciones, más fácil será corregir el error.';
 $string['submitflag'] = 'Enviar reporte';
-$string['flagsubmitted'] = '¡Gracias! Tu reporte ha sido enviado y será revisado pronto.';
-$string['alreadyflagged'] = 'Ya has reportado esta pregunta';
+$string['flagsubmitted'] = '¡Reporte enviado!';
+$string['flagsubmitted_desc'] = 'Gracias por ayudarnos a mejorar. Tu reporte será revisado pronto.';
+$string['alreadyflagged'] = 'Ya reportada';
 
 // Teacher/Reviewer UI
 $string['flaggedquestions'] = 'Preguntas Reportadas';
@@ -176,16 +183,30 @@ $string['flagresolved'] = 'El reporte ha sido resuelto correctamente.';
 $string['flagdismissed'] = 'El reporte ha sido descartado.';
 
 // Notifications
-$string['notification_resolved_subject'] = 'Tu reporte sobre "{$a->questionname}" ha sido resuelto';
-$string['notification_resolved_full'] = 'Tu reporte sobre la pregunta "{$a->questionname}" ha sido revisado y resuelto.\n\nResolución: {$a->resolution}\n\nFeedback del profesor:\n{$a->feedback}';
+$string['notification_resolved_subject'] = 'Tu reporte sobre la pregunta "{$a->questionname}" ha sido resuelto';
+$string['notification_resolved_full'] = 'Tu reporte sobre la pregunta "{$a->questionname}" ha sido revisado y resuelto.
+
+Pregunta: {$a->questionpreview}
+
+Resolución: {$a->resolution}
+
+Feedback del profesor:
+{$a->feedback}';
 $string['notification_resolved_small'] = 'Tu reporte ha sido resuelto';
 
-$string['notification_dismissed_subject'] = 'Tu reporte sobre "{$a->questionname}" ha sido revisado';
-$string['notification_dismissed_full'] = 'Tu reporte sobre la pregunta "{$a->questionname}" ha sido revisado.\n\nRespuesta del profesor:\n{$a->feedback}';
+$string['notification_dismissed_subject'] = 'Tu reporte sobre la pregunta "{$a->questionname}" ha sido revisado';
+$string['notification_dismissed_full'] = 'Tu reporte sobre la pregunta "{$a->questionname}" ha sido revisado.
+
+Pregunta: {$a->questionpreview}
+
+Respuesta del profesor:
+{$a->feedback}';
 $string['notification_dismissed_small'] = 'Tu reporte ha sido revisado';
 
 $string['notification_newflag_subject'] = 'Nueva pregunta reportada: {$a->questionname}';
-$string['notification_newflag_full'] = 'Un estudiante ha reportado un problema con la pregunta "{$a->questionname}" (ID: {$a->questionid}).\n\nAccede al panel de reportes para revisar el detalle.';
+$string['notification_newflag_full'] = 'Un estudiante ha reportado un problema con la pregunta "{$a->questionname}" (ID: {$a->questionid}).
+
+Accede al panel de reportes para revisar el detalle.';
 $string['notification_newflag_small'] = 'Nueva pregunta reportada';
 
 // Message providers
@@ -202,5 +223,18 @@ $string['invalidreason'] = 'Motivo de reporte inválido.';
 $string['invalidresolution'] = 'Tipo de resolución inválido.';
 $string['invalidaction'] = 'Acción inválida.';
 $string['questionnotfound'] = 'La pregunta no existe.';
+
+// Edit modal
+$string['questionname'] = 'Nombre de la pregunta';
+$string['questiontextplaceholder'] = 'Escribe el texto de la pregunta...';
+$string['editquestionhelp'] = 'Edita el texto del enunciado de la pregunta. Los cambios se guardarán directamente en la base de datos.';
+$string['questionsaved'] = 'Pregunta guardada correctamente.';
+$string['saving'] = 'Guardando...';
+$string['selectcorrectanswer'] = 'Selecciona la opción correcta marcando el botón de radio correspondiente.';
+$string['generalfeedbackhelp'] = 'Este feedback se muestra a todos los estudiantes después de responder, independientemente de si acertaron o no.';
+$string['answertext'] = 'Texto de la respuesta';
+$string['answerfeedback'] = 'Feedback de la respuesta';
+$string['savechanges'] = 'Guardar cambios';
+$string['savingchanges'] = 'Guardando cambios...';
 
 

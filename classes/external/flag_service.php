@@ -275,7 +275,7 @@ class flag_service extends external_api {
 
         $flags = flag_manager::get_flags_for_question($params['questionid']);
         $status = flag_manager::get_flag_status($params['questionid']);
-        $question = $DB->get_record('question', ['id' => $params['questionid']], 'id, name, questiontext');
+        $question = $DB->get_record('question', ['id' => $params['questionid']], 'id, name, questiontext, generalfeedback');
         $reasons = flag_manager::get_reasons();
 
         $flaglist = [];
@@ -291,15 +291,30 @@ class flag_service extends external_api {
             ];
         }
 
+        // Fetch answers for the question.
+        $answers = $DB->get_records('question_answers', ['question' => $params['questionid']], 'id ASC');
+        $answerlist = [];
+        foreach ($answers as $answer) {
+            $answerlist[] = [
+                'id' => (int)$answer->id,
+                'answer' => $answer->answer,
+                'feedback' => $answer->feedback ?? '',
+                'fraction' => (float)$answer->fraction,
+                'iscorrect' => $answer->fraction > 0.9,
+            ];
+        }
+
         return [
             'questionid' => (int)$params['questionid'],
             'questionname' => $question ? $question->name : '',
             'questiontext' => $question ? $question->questiontext : '',
+            'generalfeedback' => $question ? ($question->generalfeedback ?? '') : '',
             'status' => $status ? $status->status : '',
             'flagcount' => $status ? (int)$status->flagcount : 0,
             'resolution' => $status ? ($status->resolution ?? '') : '',
             'resolutionfeedback' => $status ? ($status->resolutionfeedback ?? '') : '',
             'flags' => $flaglist,
+            'answers' => $answerlist,
         ];
     }
 
@@ -312,6 +327,7 @@ class flag_service extends external_api {
             'questionname' => new external_value(PARAM_TEXT, 'Question name'),
             // Note: questiontext may contain HTML (Moodle questions use formatted text).
             'questiontext' => new external_value(PARAM_RAW, 'Full question text'),
+            'generalfeedback' => new external_value(PARAM_RAW, 'General feedback'),
             'status' => new external_value(PARAM_ALPHA, 'Current status'),
             'flagcount' => new external_value(PARAM_INT, 'Total flag count'),
             'resolution' => new external_value(PARAM_ALPHANUMEXT, 'Resolution type'),
@@ -325,6 +341,15 @@ class flag_service extends external_api {
                     'reason_label' => new external_value(PARAM_TEXT, 'Reason label'),
                     'comment' => new external_value(PARAM_TEXT, 'User comment'),
                     'timecreated' => new external_value(PARAM_INT, 'Time created'),
+                ])
+            ),
+            'answers' => new external_multiple_structure(
+                new external_single_structure([
+                    'id' => new external_value(PARAM_INT, 'Answer ID'),
+                    'answer' => new external_value(PARAM_RAW, 'Answer text'),
+                    'feedback' => new external_value(PARAM_RAW, 'Answer feedback'),
+                    'fraction' => new external_value(PARAM_FLOAT, 'Fraction (1.0 = correct)'),
+                    'iscorrect' => new external_value(PARAM_BOOL, 'Whether this is the correct answer'),
                 ])
             ),
         ]);

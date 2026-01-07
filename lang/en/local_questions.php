@@ -33,6 +33,7 @@ $string['import'] = 'Import';
 
 // Questions table
 $string['category'] = 'Category';
+$string['allcategories'] = 'All categories';
 $string['subcategories'] = 'Subcategories';
 $string['perpage'] = 'Per page';
 $string['questiontext'] = 'Question Text';
@@ -132,17 +133,23 @@ $string['resolution_duplicate'] = 'Duplicate report';
 $string['resolution_dismissed'] = 'Report dismissed';
 
 // Student UI
-$string['reportquestion'] = 'Report question';
-$string['flagmodal_intro'] = 'Have you found a problem with this question? Help us improve by reporting it here. Your feedback will be reviewed by the teaching team.';
-$string['reason'] = 'Reason for report';
-$string['selectreason'] = 'Select a reason...';
-$string['reasonrequired'] = 'Please select a reason';
-$string['comment'] = 'Comment (optional)';
-$string['commentplaceholder'] = 'Describe the problem you found...';
-$string['commenthelp'] = 'Provide additional details to help understand the issue.';
+$string['reportquestion'] = 'Report question as incorrect';
+$string['reportquestion_short'] = 'Report error';
+$string['flagconfirm_title'] = 'Are you sure?';
+$string['flagconfirm_warning'] = 'You are about to report an <strong>error in this question</strong> (incorrect statement, wrong answer, outdated regulation, etc.).<br><br><strong>This is NOT for questions about the content</strong>, which you should ask your course teacher directly.';
+$string['flagconfirm_yes'] = 'Yes, there is an error';
+$string['flagconfirm_no'] = 'Cancel';
+$string['flagmodal_intro'] = 'Indicate the type of error and provide details to help us fix it.';
+$string['reason'] = 'Error type';
+$string['selectreason'] = 'Select the error type...';
+$string['reasonrequired'] = 'Please select the error type';
+$string['comment'] = 'Error description (optional)';
+$string['commentplaceholder'] = 'Describe the error you found...';
+$string['commenthelp'] = 'The more details you provide, the easier it will be to fix the error.';
 $string['submitflag'] = 'Submit report';
-$string['flagsubmitted'] = 'Thank you! Your report has been submitted and will be reviewed soon.';
-$string['alreadyflagged'] = 'You have already reported this question';
+$string['flagsubmitted'] = 'Report sent!';
+$string['flagsubmitted_desc'] = 'Thank you for helping us improve. Your report will be reviewed soon.';
+$string['alreadyflagged'] = 'Already reported';
 
 // Teacher/Reviewer UI
 $string['flaggedquestions'] = 'Reported Questions';
@@ -176,16 +183,30 @@ $string['flagresolved'] = 'The report has been resolved successfully.';
 $string['flagdismissed'] = 'The report has been dismissed.';
 
 // Notifications
-$string['notification_resolved_subject'] = 'Your report on "{$a->questionname}" has been resolved';
-$string['notification_resolved_full'] = 'Your report on the question "{$a->questionname}" has been reviewed and resolved.\n\nResolution: {$a->resolution}\n\nTeacher feedback:\n{$a->feedback}';
+$string['notification_resolved_subject'] = 'Your report on question "{$a->questionname}" has been resolved';
+$string['notification_resolved_full'] = 'Your report on the question "{$a->questionname}" has been reviewed and resolved.
+
+Question: {$a->questionpreview}
+
+Resolution: {$a->resolution}
+
+Teacher feedback:
+{$a->feedback}';
 $string['notification_resolved_small'] = 'Your report has been resolved';
 
-$string['notification_dismissed_subject'] = 'Your report on "{$a->questionname}" has been reviewed';
-$string['notification_dismissed_full'] = 'Your report on the question "{$a->questionname}" has been reviewed.\n\nTeacher response:\n{$a->feedback}';
+$string['notification_dismissed_subject'] = 'Your report on question "{$a->questionname}" has been reviewed';
+$string['notification_dismissed_full'] = 'Your report on the question "{$a->questionname}" has been reviewed.
+
+Question: {$a->questionpreview}
+
+Teacher response:
+{$a->feedback}';
 $string['notification_dismissed_small'] = 'Your report has been reviewed';
 
 $string['notification_newflag_subject'] = 'New question reported: {$a->questionname}';
-$string['notification_newflag_full'] = 'A student has reported a problem with the question "{$a->questionname}" (ID: {$a->questionid}).\n\nAccess the reports panel to review the details.';
+$string['notification_newflag_full'] = 'A student has reported a problem with the question "{$a->questionname}" (ID: {$a->questionid}).
+
+Access the reports panel to review the details.';
 $string['notification_newflag_small'] = 'New question reported';
 
 // Message providers
@@ -202,5 +223,18 @@ $string['invalidreason'] = 'Invalid report reason.';
 $string['invalidresolution'] = 'Invalid resolution type.';
 $string['invalidaction'] = 'Invalid action.';
 $string['questionnotfound'] = 'Question not found.';
+
+// Edit modal
+$string['questionname'] = 'Question name';
+$string['questiontextplaceholder'] = 'Enter the question text...';
+$string['editquestionhelp'] = 'Edit the question text. Changes will be saved directly to the database.';
+$string['questionsaved'] = 'Question saved successfully.';
+$string['saving'] = 'Saving...';
+$string['selectcorrectanswer'] = 'Select the correct answer by clicking the corresponding radio button.';
+$string['generalfeedbackhelp'] = 'This feedback is shown to all students after answering, regardless of whether they got it right.';
+$string['answertext'] = 'Answer text';
+$string['answerfeedback'] = 'Answer feedback';
+$string['savechanges'] = 'Save changes';
+$string['savingchanges'] = 'Saving changes...';
 
 

@@ -1,0 +1,125 @@
+{{!
+    @template local_questions/flag_edit_modal
+
+    Modal for inline editing a flagged question with all fields.
+}}
+<div class="modal fade" id="flag-edit-modal" tabindex="-1"
+     aria-labelledby="flag-edit-title" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-secondary text-white">
+                <h5 class="modal-title" id="flag-edit-title">
+                    <i class="fa fa-edit me-2"></i>
+                    {{#str}}editquestion, local_questions{{/str}}
+                </h5>
+                <button type="button" class="btn-close btn-close-white close-edit-btn" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="edit-questionid" value="">
+
+                {{! Loading spinner }}
+                <div id="edit-loading" class="text-center py-5">
+                    <div class="spinner-border text-secondary" role="status">
+                        <span class="visually-hidden">{{#str}}loading{{/str}}</span>
+                    </div>
+                </div>
+
+                {{! Content (hidden initially) }}
+                <div id="edit-content" class="d-none">
+                    {{! Question name (readonly) }}
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">
+                            <i class="fa fa-tag me-1"></i>
+                            {{#str}}questionname, local_questions{{/str}}
+                        </label>
+                        <div id="edit-questionname" class="form-control-plaintext bg-light p-2 rounded"></div>
+                    </div>
+
+                    {{! Question text (editable) }}
+                    <div class="mb-3">
+                        <label for="edit-questiontext" class="form-label fw-bold">
+                            <i class="fa fa-question-circle me-1"></i>
+                            {{#str}}questiontext, local_questions{{/str}} <span class="text-danger">*</span>
+                        </label>
+                        <textarea class="form-control" id="edit-questiontext" rows="4" required></textarea>
+                    </div>
+
+                    {{! Answers section }}
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">
+                            <i class="fa fa-list-ol me-1"></i>
+                            {{#str}}answers, local_questions{{/str}}
+                        </label>
+                        <div class="card">
+                            <div class="card-body p-0">
+                                <div id="edit-answers-container">
+                                    {{! Answers will be populated by JavaScript }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-text">
+                            <i class="fa fa-info-circle me-1"></i>
+                            {{#str}}selectcorrectanswer, local_questions{{/str}}
+                        </div>
+                    </div>
+
+                    {{! General feedback (editable) }}
+                    <div class="mb-3">
+                        <label for="edit-generalfeedback" class="form-label fw-bold">
+                            <i class="fa fa-comment me-1"></i>
+                            {{#str}}generalfeedback, local_questions{{/str}}
+                        </label>
+                        <textarea class="form-control" id="edit-generalfeedback" rows="3"></textarea>
+                        <div class="form-text">
+                            {{#str}}generalfeedbackhelp, local_questions{{/str}}
+                        </div>
+                    </div>
+
+                    {{! Alerts }}
+                    <div class="alert alert-success d-none" id="edit-success-message">
+                        <i class="fa fa-check-circle me-2"></i>
+                        {{#str}}questionsaved, local_questions{{/str}}
+                    </div>
+
+                    <div class="alert alert-danger d-none" id="edit-error-message">
+                        <i class="fa fa-exclamation-circle me-2"></i>
+                        <span id="edit-error-text"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary close-edit-btn">
+                    {{#str}}cancel{{/str}}
+                </button>
+                <button type="button" class="btn btn-primary" id="save-edit-btn">
+                    <i class="fa fa-save me-1"></i>
+                    {{#str}}savechanges{{/str}}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{! Template for answer item (used by JavaScript) }}
+<template id="edit-answer-template">
+    <div class="answer-item border-bottom p-3" data-answerid="">
+        <div class="row align-items-start">
+            <div class="col-auto">
+                <div class="form-check mt-2">
+                    <input class="form-check-input correct-answer-radio" type="radio" name="correct-answer">
+                    <label class="form-check-label fw-bold answer-label"></label>
+                </div>
+            </div>
+            <div class="col">
+                <div class="mb-2">
+                    <label class="form-label small text-muted mb-1">{{#str}}answertext, local_questions{{/str}}</label>
+                    <textarea class="form-control form-control-sm answer-text" rows="2"></textarea>
+                </div>
+                <div>
+                    <label class="form-label small text-muted mb-1">{{#str}}answerfeedback, local_questions{{/str}}</label>
+                    <textarea class="form-control form-control-sm answer-feedback" rows="2"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>

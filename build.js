@@ -42,16 +42,11 @@ const buildOptions = {
     outdir: buildDir,
     minify: true,
     sourcemap: false,
-    // Keep AMD format - don't bundle or transform module format.
-    format: 'iife',
-    // Preserve define() calls for Moodle AMD loader.
-    banner: {
-        js: '// Minified by local_questions build script.'
-    },
     // Output with .min.js extension as Moodle expects.
     outExtension: { '.js': '.min.js' },
-    // Don't bundle - keep external dependencies.
+    // Don't bundle - keep external dependencies as AMD requires.
     bundle: false,
+    // Don't add any wrapper - AMD define() must be at top level for RequireJS.
 };
 
 // Check for watch mode.
