@@ -160,10 +160,12 @@ class renderer extends plugin_renderer_base {
             $totalcount = $DB->count_records_sql($countsql, $inparams);
 
             // Build the main query for fetching questions.
-            $selectsql = "SELECT q.*
+            // Include category context to build proper edit URLs.
+            $selectsql = "SELECT q.*, qbe.questioncategoryid, qc.contextid
                             FROM {question} q
                             JOIN {question_versions} qv ON qv.questionid = q.id
                             JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid
+                            JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
                            WHERE qbe.questioncategoryid $insql
                              AND qv.status = 'ready'
                              AND qv.version = (
@@ -208,7 +210,21 @@ class renderer extends plugin_renderer_base {
             }
 
             // Build edit URL for the question.
-            $editurl = new \moodle_url('/question/bank/editquestion/question.php', ['id' => $q->id]);
+            // Moodle 4.x requires courseid parameter for the question editor.
+            $courseid = SITEID; // Default to site course.
+            if (!empty($q->contextid)) {
+                $context = \context::instance_by_id($q->contextid, IGNORE_MISSING);
+                if ($context) {
+                    $coursecontext = $context->get_course_context(false);
+                    if ($coursecontext) {
+                        $courseid = $coursecontext->instanceid;
+                    }
+                }
+            }
+            $editurl = new \moodle_url('/question/bank/editquestion/question.php', [
+                'id' => $q->id,
+                'courseid' => $courseid,
+            ]);
 
             $qdata[] = [
                 'id' => $q->id,
