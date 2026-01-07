@@ -12,8 +12,8 @@ defined('MOODLE_INTERNAL') || die();
  */
 class gemini_client {
 
-    /** @var string API endpoint template. */
-    private const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={key}';
+    /** @var string API endpoint template (key passed via header for security). */
+    private const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent';
 
     /**
      * Analyze a batch of questions using Gemini.
@@ -63,24 +63,29 @@ class gemini_client {
             ]
         ];
 
-        $url = str_replace(['{model}', '{key}'], [$model, $apikey], self::API_URL);
-        
-        return $this->call_api($url, $payload);
+        $url = str_replace('{model}', $model, self::API_URL);
+
+        return $this->call_api($url, $payload, $apikey);
     }
 
     /**
      * Execute the API call.
      *
-     * @param string $url
-     * @param array $payload
+     * @param string $url The API endpoint URL.
+     * @param array $payload The request payload.
+     * @param string $apikey The API key (passed via header for security).
      * @return array
      */
-    private function call_api(string $url, array $payload): array {
+    private function call_api(string $url, array $payload, string $apikey): array {
         $curl = new \curl();
+        // Security: Pass API key via header instead of URL to prevent exposure in logs.
         $options = [
-            'CURLOPT_HTTPHEADER' => ['Content-Type: application/json']
+            'CURLOPT_HTTPHEADER' => [
+                'Content-Type: application/json',
+                'x-goog-api-key: ' . $apikey
+            ]
         ];
-        
+
         $response = $curl->post($url, json_encode($payload), $options);
         
         if ($curl->get_errno()) {

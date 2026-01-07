@@ -1,0 +1,66 @@
+{{!
+    @template local_questions/flag_resolution_modal
+
+    Modal for resolving or dismissing a flagged question.
+}}
+<div class="modal fade" id="flag-resolution-modal" tabindex="-1"
+     aria-labelledby="flag-resolution-title" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" id="resolution-modal-header">
+                <h5 class="modal-title" id="flag-resolution-title">
+                    {{! Title set by JavaScript }}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{#str}}close{{/str}}"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="resolution-questionid" value="">
+                <input type="hidden" id="resolution-action" value="">
+
+                {{! Resolution type (only for resolve action) }}
+                <div class="mb-3" id="resolution-type-group">
+                    <label for="resolution-type" class="form-label fw-bold">
+                        {{#str}}resolutiontype, local_questions{{/str}} <span class="text-danger">*</span>
+                    </label>
+                    <select class="form-select" id="resolution-type" required>
+                        <option value="">{{#str}}selectresolution, local_questions{{/str}}</option>
+                        <option value="fixed">{{#str}}resolution_fixed, local_questions{{/str}}</option>
+                        <option value="no_action">{{#str}}resolution_no_action, local_questions{{/str}}</option>
+                        <option value="duplicate">{{#str}}resolution_duplicate, local_questions{{/str}}</option>
+                    </select>
+                </div>
+
+                {{! Feedback textarea }}
+                <div class="mb-3">
+                    <label for="resolution-feedback" class="form-label fw-bold">
+                        {{#str}}feedbacktostudents, local_questions{{/str}} <span class="text-danger">*</span>
+                    </label>
+                    <textarea class="form-control" id="resolution-feedback" rows="4"
+                              placeholder="{{#str}}feedbackplaceholder, local_questions{{/str}}" required></textarea>
+                    <div class="form-text">
+                        {{#str}}feedbackhelp, local_questions{{/str}}
+                    </div>
+                </div>
+
+                {{! Alerts }}
+                <div class="alert alert-success d-none" id="resolution-success-message">
+                    <i class="fa fa-check-circle me-2"></i>
+                    <span id="resolution-success-text"></span>
+                </div>
+
+                <div class="alert alert-danger d-none" id="resolution-error-message">
+                    <i class="fa fa-exclamation-circle me-2"></i>
+                    <span id="resolution-error-text"></span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    {{#str}}cancel{{/str}}
+                </button>
+                <button type="button" class="btn" id="submit-resolution-btn">
+                    {{! Text set by JavaScript }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

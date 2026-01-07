@@ -35,6 +35,13 @@ if ($hassiteconfig) {
         1
     ));
 
+    $settings->add(new admin_setting_configcheckbox(
+        'local_questions/enable_flagging',
+        get_string('enable_flagging', 'local_questions'),
+        get_string('enable_flagging_desc', 'local_questions'),
+        1
+    ));
+
     // Gemini AI Settings
     $settings->add(new admin_setting_heading(
         'local_questions/gemini_heading',

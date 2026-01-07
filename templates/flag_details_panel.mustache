@@ -1,0 +1,94 @@
+{{!
+    @template local_questions/flag_details_panel
+
+    Side panel showing detailed flag information for a question.
+
+    This template renders a hidden panel that is populated via JavaScript.
+}}
+<div class="modal fade" id="flag-details-modal" tabindex="-1"
+     aria-labelledby="flag-details-title" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="flag-details-title">
+                    <i class="fa fa-list-alt me-2"></i>
+                    {{#str}}flagdetails, local_questions{{/str}}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="{{#str}}close{{/str}}"></button>
+            </div>
+            <div class="modal-body">
+                {{! Loading spinner }}
+                <div id="flag-details-loading" class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">{{#str}}loading{{/str}}</span>
+                    </div>
+                </div>
+
+                {{! Content (hidden initially) }}
+                <div id="flag-details-content" class="d-none">
+                    {{! Question info }}
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <strong>{{#str}}question{{/str}}</strong>
+                            <code class="ms-2" id="detail-questionid"></code>
+                        </div>
+                        <div class="card-body">
+                            <h6 id="detail-questionname" class="card-title"></h6>
+                            <div id="detail-questiontext" class="card-text small text-muted"></div>
+                        </div>
+                    </div>
+
+                    {{! Status summary }}
+                    <div class="d-flex justify-content-between align-items-center mb-3 p-2 bg-light rounded">
+                        <div>
+                            <strong>{{#str}}status{{/str}}:</strong>
+                            <span id="detail-status-badge"></span>
+                        </div>
+                        <div>
+                            <strong>{{#str}}totalflags, local_questions{{/str}}:</strong>
+                            <span id="detail-flagcount" class="badge bg-danger"></span>
+                        </div>
+                    </div>
+
+                    {{! Resolution info (if resolved) }}
+                    <div id="detail-resolution-info" class="alert alert-success d-none">
+                        <h6><i class="fa fa-check-circle me-2"></i>{{#str}}resolution, local_questions{{/str}}</h6>
+                        <div id="detail-resolution-text"></div>
+                        <hr>
+                        <div id="detail-resolution-feedback"></div>
+                    </div>
+
+                    {{! Individual flags }}
+                    <h6 class="mt-4 mb-3">
+                        <i class="fa fa-comments me-2"></i>
+                        {{#str}}studentreports, local_questions{{/str}}
+                    </h6>
+                    <div id="detail-flags-list">
+                        {{! Populated by JavaScript }}
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    {{#str}}close{{/str}}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{! Template for individual flag item (used by JavaScript) }}
+<template id="flag-item-template">
+    <div class="card mb-2 flag-item">
+        <div class="card-body py-2">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <span class="badge bg-warning text-dark flag-reason"></span>
+                    <small class="text-muted ms-2 flag-date"></small>
+                </div>
+                <small class="text-muted flag-user"></small>
+            </div>
+            <p class="mb-0 mt-2 flag-comment small"></p>
+        </div>
+    </div>
+</template>

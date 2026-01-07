@@ -148,30 +148,12 @@ define(['jquery', 'core/ajax', 'core/str', 'core/notification'], function ($, Aj
                         $('#ai-results').show();
                         $('#ai-apply-all').show();
 
-                        var tpl = $('#tpl-ai-suggestion').html();
-
-                        results.questions.forEach(function (q) {
-                            if (!q.suggestions || q.suggestions.length === 0) return;
-
-                            var html = tpl
-                                .replace(/{{id}}/g, q.id)
-                                .replace(/{{issueCount}}/g, q.issues.length);
-
-                            // Render issues
-                            var issuesHtml = '';
-                            q.issues.forEach(function (issue) {
-                                issuesHtml += '<li class="list-group-item list-group-item-warning"><i class="fa fa-exclamation-triangle mr-2"></i> ' + issue + '</li>';
-                            });
-                            // Simple regex replace for issues block (a bit hacky but works without full mustache engine here)
-                            // Better approach: use Mustache.render if available, but manual replacement is fine for simple stuff
-                            // Moodle loads Mustache by default. Let's use it properly.
-                        });
-
-                        // Better approach: Use Moodle's Template.render
-                        // But we are inside a success callback.
+                        // Render AI suggestions using Moodle's template system.
                         require(['core/templates'], function (Templates) {
                             results.questions.forEach(function (q) {
-                                if (!q.suggestions || q.suggestions.length === 0) return;
+                                if (!q.suggestions || q.suggestions.length === 0) {
+                                    return;
+                                }
                                 q.issueCount = q.issues.length;
                                 Templates.render('local_questions/ai_suggestion_card', q).then(function (html) {
                                     $('#ai-suggestions-list').append(html);

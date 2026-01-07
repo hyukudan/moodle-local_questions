@@ -1,0 +1,42 @@
+{{!
+    @template local_questions/flag_button
+
+    Flag button displayed in quiz review for reporting questions.
+
+    Context variables required for this template:
+    * questionid - The question ID
+    * alreadyflagged - Whether user has already flagged this question
+    * canflag - Whether user has capability to flag
+
+    Example context (json):
+    {
+        "questionid": 123,
+        "alreadyflagged": false,
+        "canflag": true
+    }
+}}
+{{#canflag}}
+<div class="local-questions-flag-container mt-2 mb-2">
+    {{#alreadyflagged}}
+    <button type="button"
+            class="btn btn-sm btn-warning local-questions-flag-btn disabled"
+            data-questionid="{{questionid}}"
+            disabled
+            title="{{#str}}alreadyflagged, local_questions{{/str}}">
+        <i class="fa fa-flag"></i>
+        <span class="ms-1">{{#str}}alreadyflagged, local_questions{{/str}}</span>
+    </button>
+    {{/alreadyflagged}}
+    {{^alreadyflagged}}
+    <button type="button"
+            class="btn btn-sm btn-outline-warning local-questions-flag-btn"
+            data-questionid="{{questionid}}"
+            data-bs-toggle="modal"
+            data-bs-target="#local-questions-flag-modal"
+            title="{{#str}}reportquestion, local_questions{{/str}}">
+        <i class="fa fa-flag"></i>
+        <span class="ms-1">{{#str}}reportquestion, local_questions{{/str}}</span>
+    </button>
+    {{/alreadyflagged}}
+</div>
+{{/canflag}}

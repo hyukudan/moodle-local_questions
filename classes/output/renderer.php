@@ -75,7 +75,21 @@ class renderer extends plugin_renderer_base {
                 'url' => new \moodle_url('/local/questions/import.php')
             ];
         }
-        
+
+        // Add flags tab if enabled and user has capability.
+        if (get_config('local_questions', 'enable_flagging')) {
+            $syscontext = \context_system::instance();
+            if (has_capability('local/questions:reviewflags', $syscontext)) {
+                $counts = \local_questions\flag_manager::count_by_status();
+                $pendingcount = $counts[\local_questions\flag_manager::STATUS_PENDING] ?? 0;
+                $badgehtml = $pendingcount > 0 ? ' <span class="badge badge-warning">' . $pendingcount . '</span>' : '';
+                $tabs['flags'] = [
+                    'name' => get_string('flags', 'local_questions') . $badgehtml,
+                    'url' => new \moodle_url('/local/questions/index.php', ['tab' => 'flags'])
+                ];
+            }
+        }
+
         $data = ['tabs' => []];
         foreach ($tabs as $key => $tab) {
             $data['tabs'][] = [
@@ -287,6 +301,96 @@ class renderer extends plugin_renderer_base {
         ];
 
         return $this->render_from_template('local_questions/import_form', $data);
+    }
+
+    /**
+     * Render the flags review tab.
+     *
+     * @param string $filter Filter by status (pending, reviewing, resolved, dismissed, or empty for all).
+     * @return string
+     */
+    public function render_flags_tab(string $filter = ''): string {
+        global $PAGE;
+
+        // Load JS module.
+        $PAGE->requires->js_call_amd('local_questions/flag_review', 'init');
+
+        // Get data.
+        $flaggedquestions = \local_questions\flag_manager::get_flagged_questions(
+            !empty($filter) ? $filter : null
+        );
+        $counts = \local_questions\flag_manager::count_by_status();
+        $reasons = \local_questions\flag_manager::get_reasons();
+        $statuses = \local_questions\flag_manager::get_statuses();
+
+        // Check capability.
+        $syscontext = \context_system::instance();
+        $canresolve = has_capability('local/questions:resolveflags', $syscontext);
+
+        // Format questions for template.
+        $formattedquestions = [];
+        foreach ($flaggedquestions as $q) {
+            $isresolvable = in_array($q->status, [
+                \local_questions\flag_manager::STATUS_PENDING,
+                \local_questions\flag_manager::STATUS_REVIEWING
+            ]);
+
+            $statusbadge = $this->get_status_badge($q->status);
+
+            $formattedquestions[] = [
+                'id' => $q->id,
+                'questionid' => $q->questionid,
+                'questionname' => $q->questionname ?? '',
+                'questiontext_preview' => strip_tags($q->questiontext_preview ?? ''),
+                'categoryname' => $q->categoryname ?? '',
+                'status' => $q->status,
+                'status_badge' => $statusbadge,
+                'flagcount' => $q->flagcount,
+                'topreason' => \local_questions\flag_manager::get_top_reason($q->questionid) ?? '',
+                'topreason_label' => $reasons[\local_questions\flag_manager::get_top_reason($q->questionid)] ?? '',
+                'lastflag_date' => userdate($q->timemodified, get_string('strftimedatetimeshort', 'langconfig')),
+                'canresolve' => $canresolve,
+                'isresolvable' => $isresolvable,
+            ];
+        }
+
+        $data = [
+            'flagged_questions' => $formattedquestions,
+            'hasflaggedquestions' => !empty($formattedquestions),
+            'counts' => [
+                'all' => $counts['all'],
+                'pending' => $counts[\local_questions\flag_manager::STATUS_PENDING],
+                'reviewing' => $counts[\local_questions\flag_manager::STATUS_REVIEWING],
+                'resolved' => $counts[\local_questions\flag_manager::STATUS_RESOLVED],
+                'dismissed' => $counts[\local_questions\flag_manager::STATUS_DISMISSED],
+            ],
+            'filter' => $filter,
+            'filter_all' => empty($filter) || $filter === 'all',
+            'filter_pending' => $filter === 'pending',
+            'filter_reviewing' => $filter === 'reviewing',
+            'filter_resolved' => $filter === 'resolved',
+            'filter_dismissed' => $filter === 'dismissed',
+            'canresolve' => $canresolve,
+        ];
+
+        return $this->render_from_template('local_questions/flags_tab', $data);
+    }
+
+    /**
+     * Get HTML badge for a status (Bootstrap 5 compatible).
+     *
+     * @param string $status The status code.
+     * @return string HTML badge.
+     */
+    private function get_status_badge(string $status): string {
+        $badges = [
+            'pending' => '<span class="badge bg-warning text-dark">' . get_string('status_pending', 'local_questions') . '</span>',
+            'reviewing' => '<span class="badge bg-info">' . get_string('status_reviewing', 'local_questions') . '</span>',
+            'resolved' => '<span class="badge bg-success">' . get_string('status_resolved', 'local_questions') . '</span>',
+            'dismissed' => '<span class="badge bg-dark">' . get_string('status_dismissed', 'local_questions') . '</span>',
+        ];
+        // Security: Escape unknown statuses to prevent XSS.
+        return $badges[$status] ?? '<span class="badge bg-secondary">' . s($status) . '</span>';
     }
 }
 

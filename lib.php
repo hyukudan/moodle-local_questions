@@ -49,3 +49,62 @@ function local_questions_extend_settings_navigation(settings_navigation $setting
         );
     }
 }
+
+/**
+ * Add flag button to question footer in quiz review.
+ *
+ * This hook is called by the question engine during rendering.
+ *
+ * @param int $questionid The question ID
+ * @param context $context The context (optional)
+ * @param string $component The component name (optional)
+ * @return string HTML for the flag button
+ */
+function local_questions_get_question_footer($questionid, $context = null, $component = '') {
+    global $DB, $OUTPUT, $PAGE, $USER;
+
+    // Check if flagging is enabled.
+    if (!get_config('local_questions', 'enable_flagging')) {
+        return '';
+    }
+
+    // Check capability.
+    $syscontext = context_system::instance();
+    if (!has_capability('local/questions:flag', $syscontext)) {
+        return '';
+    }
+
+    // Check if user already flagged this question.
+    $alreadyflagged = $DB->record_exists('local_questions_flags', [
+        'questionid' => $questionid,
+        'userid' => $USER->id,
+    ]);
+
+    // Load JS module.
+    $PAGE->requires->js_call_amd('local_questions/flagging', 'init');
+
+    // Get reasons for the modal template.
+    $reasons = [];
+    foreach (\local_questions\flag_manager::get_reasons() as $value => $label) {
+        $reasons[] = ['value' => $value, 'label' => $label];
+    }
+
+    // Render button.
+    $buttondata = [
+        'questionid' => $questionid,
+        'alreadyflagged' => $alreadyflagged,
+        'canflag' => true,
+    ];
+    $buttonhtml = $OUTPUT->render_from_template('local_questions/flag_button', $buttondata);
+
+    // Render modal (only once per page).
+    static $modalrendered = false;
+    $modalhtml = '';
+    if (!$modalrendered) {
+        $modaldata = ['reasons' => $reasons];
+        $modalhtml = $OUTPUT->render_from_template('local_questions/flag_modal', $modaldata);
+        $modalrendered = true;
+    }
+
+    return $buttonhtml . $modalhtml;
+}

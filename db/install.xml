@@ -43,5 +43,48 @@
         <INDEX NAME="timecreated" UNIQUE="false" FIELDS="timecreated"/>
       </INDEXES>
     </TABLE>
+    <TABLE NAME="local_questions_flags" COMMENT="Question flags/reports from students">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="questionid" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="Question ID being reported"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="User who flagged"/>
+        <FIELD NAME="attemptid" TYPE="int" LENGTH="10" NOTNULL="false" COMMENT="Quiz attempt ID for context"/>
+        <FIELD NAME="reason" TYPE="char" LENGTH="50" NOTNULL="true" COMMENT="Predefined reason code"/>
+        <FIELD NAME="comment" TYPE="text" NOTNULL="false" COMMENT="Free text comment from student"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="questionid" TYPE="foreign" FIELDS="questionid" REFTABLE="question" REFFIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="questionid-userid" UNIQUE="true" FIELDS="questionid,userid" COMMENT="One flag per user per question"/>
+        <INDEX NAME="timecreated" UNIQUE="false" FIELDS="timecreated"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="local_questions_flag_status" COMMENT="Aggregated flag status per question">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="questionid" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="Question ID"/>
+        <FIELD NAME="status" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="pending" COMMENT="pending, reviewing, resolved, dismissed"/>
+        <FIELD NAME="flagcount" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="1" COMMENT="Number of flags"/>
+        <FIELD NAME="resolvedby" TYPE="int" LENGTH="10" NOTNULL="false" COMMENT="User who resolved"/>
+        <FIELD NAME="resolution" TYPE="char" LENGTH="20" NOTNULL="false" COMMENT="fixed, no_action, duplicate"/>
+        <FIELD NAME="resolutionfeedback" TYPE="text" NOTNULL="false" COMMENT="Feedback to students"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="timeresolved" TYPE="int" LENGTH="10" NOTNULL="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="questionid" TYPE="foreign-unique" FIELDS="questionid" REFTABLE="question" REFFIELDS="id"/>
+        <KEY NAME="resolvedby" TYPE="foreign" FIELDS="resolvedby" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="status" UNIQUE="false" FIELDS="status"/>
+        <INDEX NAME="flagcount" UNIQUE="false" FIELDS="flagcount"/>
+      </INDEXES>
+    </TABLE>
   </TABLES>
 </XMLDB>

@@ -1,0 +1,22 @@
+{
+  "name": "local_questions",
+  "version": "0.5.0",
+  "description": "Moodle plugin for question management with flagging system",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.js",
+    "build:watch": "node build.js --watch",
+    "lint": "eslint amd/src/",
+    "lint:fix": "eslint amd/src/ --fix"
+  },
+  "devDependencies": {
+    "esbuild": "^0.24.0",
+    "@eslint/js": "^9.17.0",
+    "eslint": "^9.17.0",
+    "globals": "^15.14.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

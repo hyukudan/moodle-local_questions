@@ -1,0 +1,82 @@
+{{!
+    @template local_questions/flag_modal
+
+    Modal dialog for submitting a question flag.
+
+    Context variables required for this template:
+    * reasons - Array of reason objects with value and label
+
+    Example context (json):
+    {
+        "reasons": [
+            {"value": "error_statement", "label": "Error en enunciado"},
+            {"value": "wrong_answer", "label": "Respuesta incorrecta"}
+        ]
+    }
+}}
+<div class="modal fade" id="local-questions-flag-modal" tabindex="-1"
+     aria-labelledby="flag-modal-title" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title" id="flag-modal-title">
+                    <i class="fa fa-flag me-2"></i>
+                    {{#str}}reportquestion, local_questions{{/str}}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{#str}}close{{/str}}"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="flag-questionid" value="">
+
+                <p class="text-muted mb-3">
+                    {{#str}}flagmodal_intro, local_questions{{/str}}
+                </p>
+
+                <div class="mb-3">
+                    <label for="flag-reason" class="form-label fw-bold">
+                        {{#str}}reason, local_questions{{/str}} <span class="text-danger">*</span>
+                    </label>
+                    <select class="form-select" id="flag-reason" required>
+                        <option value="">{{#str}}selectreason, local_questions{{/str}}</option>
+                        {{#reasons}}
+                        <option value="{{value}}">{{label}}</option>
+                        {{/reasons}}
+                    </select>
+                    <div class="invalid-feedback">
+                        {{#str}}reasonrequired, local_questions{{/str}}
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="flag-comment" class="form-label fw-bold">
+                        {{#str}}comment, local_questions{{/str}}
+                    </label>
+                    <textarea class="form-control" id="flag-comment" rows="4"
+                              placeholder="{{#str}}commentplaceholder, local_questions{{/str}}"></textarea>
+                    <div class="form-text">
+                        {{#str}}commenthelp, local_questions{{/str}}
+                    </div>
+                </div>
+
+                <div class="alert alert-info d-none" id="flag-success-message">
+                    <i class="fa fa-check-circle me-2"></i>
+                    {{#str}}flagsubmitted, local_questions{{/str}}
+                </div>
+
+                <div class="alert alert-danger d-none" id="flag-error-message">
+                    <i class="fa fa-exclamation-circle me-2"></i>
+                    <span id="flag-error-text"></span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    {{#str}}cancel{{/str}}
+                </button>
+                <button type="button" class="btn btn-warning" id="submit-flag-btn">
+                    <i class="fa fa-flag me-1"></i>
+                    {{#str}}submitflag, local_questions{{/str}}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

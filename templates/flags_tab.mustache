@@ -1,0 +1,145 @@
+{{!
+    @template local_questions/flags_tab
+
+    Flagged questions review tab for teachers/reviewers.
+
+    Context variables required for this template:
+    * flagged_questions - Array of flagged question objects
+    * counts - Object with status counts
+    * filter - Current filter status
+    * canresolve - Whether user can resolve flags
+
+    Example context (json):
+    {
+        "counts": {"all": 10, "pending": 5, "reviewing": 2, "resolved": 2, "dismissed": 1},
+        "filter": "pending",
+        "canresolve": true,
+        "flagged_questions": []
+    }
+}}
+<div class="flags-review-container" id="flags-review-container">
+    {{! Header with filters }}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="mb-0">
+            <i class="fa fa-flag text-warning me-2"></i>
+            {{#str}}flaggedquestions, local_questions{{/str}}
+        </h4>
+        <div class="btn-group btn-group-sm" role="group" aria-label="{{#str}}filterbystatus, local_questions{{/str}}">
+            <button type="button" class="btn btn-outline-secondary filter-btn {{#filter_all}}active{{/filter_all}}"
+                    data-filter="all">
+                {{#str}}all{{/str}}
+                <span class="badge bg-secondary ms-1">{{counts.all}}</span>
+            </button>
+            <button type="button" class="btn btn-outline-warning filter-btn {{#filter_pending}}active{{/filter_pending}}"
+                    data-filter="pending">
+                {{#str}}status_pending, local_questions{{/str}}
+                <span class="badge bg-warning text-dark ms-1">{{counts.pending}}</span>
+            </button>
+            <button type="button" class="btn btn-outline-info filter-btn {{#filter_reviewing}}active{{/filter_reviewing}}"
+                    data-filter="reviewing">
+                {{#str}}status_reviewing, local_questions{{/str}}
+                <span class="badge bg-info ms-1">{{counts.reviewing}}</span>
+            </button>
+            <button type="button" class="btn btn-outline-success filter-btn {{#filter_resolved}}active{{/filter_resolved}}"
+                    data-filter="resolved">
+                {{#str}}status_resolved, local_questions{{/str}}
+                <span class="badge bg-success ms-1">{{counts.resolved}}</span>
+            </button>
+            <button type="button" class="btn btn-outline-dark filter-btn {{#filter_dismissed}}active{{/filter_dismissed}}"
+                    data-filter="dismissed">
+                {{#str}}status_dismissed, local_questions{{/str}}
+                <span class="badge bg-dark ms-1">{{counts.dismissed}}</span>
+            </button>
+        </div>
+    </div>
+
+    {{! Questions table }}
+    {{#hasflaggedquestions}}
+    <div class="table-responsive">
+        <table class="table table-hover table-striped" id="flags-table">
+            <thead class="thead-light">
+                <tr>
+                    <th scope="col" style="width: 5%">ID</th>
+                    <th scope="col" style="width: 35%">{{#str}}question{{/str}}</th>
+                    <th scope="col" style="width: 10%">{{#str}}flagcount, local_questions{{/str}}</th>
+                    <th scope="col" style="width: 15%">{{#str}}topreason, local_questions{{/str}}</th>
+                    <th scope="col" style="width: 10%">{{#str}}status{{/str}}</th>
+                    <th scope="col" style="width: 10%">{{#str}}lastflag, local_questions{{/str}}</th>
+                    <th scope="col" style="width: 15%">{{#str}}actions{{/str}}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#flagged_questions}}
+                <tr data-questionid="{{questionid}}" data-status="{{status}}">
+                    <td class="align-middle">
+                        <code>#{{questionid}}</code>
+                    </td>
+                    <td class="align-middle">
+                        <strong class="d-block">{{questionname}}</strong>
+                        <small class="text-muted text-truncate d-block" style="max-width: 300px;">
+                            {{questiontext_preview}}
+                        </small>
+                        {{#categoryname}}
+                        <span class="badge bg-light text-dark mt-1">{{categoryname}}</span>
+                        {{/categoryname}}
+                    </td>
+                    <td class="align-middle text-center">
+                        <span class="badge rounded-pill bg-danger" style="font-size: 1rem;">{{flagcount}}</span>
+                    </td>
+                    <td class="align-middle">
+                        <span class="badge bg-warning text-dark">{{topreason_label}}</span>
+                    </td>
+                    <td class="align-middle">
+                        {{{status_badge}}}
+                    </td>
+                    <td class="align-middle">
+                        <small class="text-muted">{{lastflag_date}}</small>
+                    </td>
+                    <td class="align-middle">
+                        <div class="btn-group btn-group-sm" role="group">
+                            <button type="button" class="btn btn-outline-primary view-details-btn"
+                                    data-questionid="{{questionid}}"
+                                    title="{{#str}}viewdetails, local_questions{{/str}}">
+                                <i class="fa fa-eye"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary edit-question-btn"
+                                    data-questionid="{{questionid}}"
+                                    title="{{#str}}editquestion, local_questions{{/str}}">
+                                <i class="fa fa-edit"></i>
+                            </button>
+                            {{#canresolve}}
+                            {{#isresolvable}}
+                            <button type="button" class="btn btn-outline-success resolve-btn"
+                                    data-questionid="{{questionid}}"
+                                    title="{{#str}}resolve, local_questions{{/str}}">
+                                <i class="fa fa-check"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-danger dismiss-btn"
+                                    data-questionid="{{questionid}}"
+                                    title="{{#str}}dismiss, local_questions{{/str}}">
+                                <i class="fa fa-times"></i>
+                            </button>
+                            {{/isresolvable}}
+                            {{/canresolve}}
+                        </div>
+                    </td>
+                </tr>
+                {{/flagged_questions}}
+            </tbody>
+        </table>
+    </div>
+    {{/hasflaggedquestions}}
+
+    {{! Empty state }}
+    {{^hasflaggedquestions}}
+    <div class="alert alert-success text-center py-5">
+        <i class="fa fa-check-circle fa-3x mb-3 d-block"></i>
+        <h5>{{#str}}noflaggedquestions, local_questions{{/str}}</h5>
+        <p class="mb-0 text-muted">{{#str}}noflaggedquestions_desc, local_questions{{/str}}</p>
+    </div>
+    {{/hasflaggedquestions}}
+</div>
+
+{{! Include detail panel and resolution modal }}
+{{> local_questions/flag_details_panel }}
+{{> local_questions/flag_resolution_modal }}

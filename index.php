@@ -41,6 +41,11 @@ switch ($tab) {
         $perpage = optional_param('perpage', 20, PARAM_INT);
         echo $output->render_questions_view($categoryid, $recurse, $page, $perpage);
         break;
+    case 'flags':
+        require_capability('local/questions:reviewflags', $context);
+        $filter = optional_param('filter', '', PARAM_ALPHA);
+        echo $output->render_flags_tab($filter);
+        break;
     case 'dashboard':
     default:
         echo $output->render_dashboard($totalquestions, (bool)$enablefeatures);

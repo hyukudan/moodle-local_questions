@@ -14,7 +14,13 @@ $string['enable_features'] = 'Habilitar Funcionalidades';
 $string['enable_features_desc'] = 'Habilitar funcionalidades extendidas para el plugin de preguntas.';
 $string['dashboard'] = 'Tablero de Preguntas';
 $string['totalquestions'] = 'Total de Preguntas';
-$string['privacy:metadata'] = 'El plugin de Gestión de Preguntas no almacena ningún dato personal.';
+// Privacy API.
+$string['privacy:metadata:local_questions_flags'] = 'Almacena los reportes de preguntas enviados por usuarios.';
+$string['privacy:metadata:local_questions_flags:userid'] = 'El ID del usuario que envió el reporte.';
+$string['privacy:metadata:local_questions_flags:questionid'] = 'El ID de la pregunta reportada.';
+$string['privacy:metadata:local_questions_flags:reason'] = 'El motivo seleccionado para el reporte.';
+$string['privacy:metadata:local_questions_flags:comment'] = 'El comentario opcional proporcionado por el usuario.';
+$string['privacy:metadata:local_questions_flags:timecreated'] = 'La fecha y hora en que se envió el reporte.';
 $string['features_enabled'] = '¡Funcionalidades habilitadas!';
 $string['questions:manage'] = 'Gestionar administración de preguntas';
 $string['questions:export'] = 'Exportar estadísticas de preguntas';
@@ -77,5 +83,106 @@ $string['gemini_model'] = 'Modelo';
 $string['gemini_model_desc'] = 'Selecciona el modelo Gemini a usar.';
 $string['gemini_prompt'] = 'Prompt del Sistema';
 $string['gemini_prompt_desc'] = 'Instrucciones personalizadas para el auditor AI.';
+
+// Question Flagging System
+$string['flags'] = 'Reportes';
+$string['enable_flagging'] = 'Habilitar Reportes de Preguntas';
+$string['enable_flagging_desc'] = 'Permitir a los estudiantes reportar problemas en preguntas durante la revisión de exámenes.';
+
+// Capabilities
+$string['questions:flag'] = 'Reportar preguntas problemáticas';
+$string['questions:reviewflags'] = 'Revisar reportes de preguntas';
+$string['questions:resolveflags'] = 'Resolver reportes de preguntas';
+
+// Flag reasons
+$string['reason_error_statement'] = 'Error en el enunciado';
+$string['reason_wrong_answer'] = 'Respuesta incorrecta marcada como correcta';
+$string['reason_outdated_law'] = 'Normativa obsoleta o derogada';
+$string['reason_ambiguous'] = 'Pregunta ambigua o confusa';
+$string['reason_other'] = 'Otro motivo';
+
+// Flag statuses
+$string['status_pending'] = 'Pendiente';
+$string['status_reviewing'] = 'En revisión';
+$string['status_resolved'] = 'Resuelta';
+$string['status_dismissed'] = 'Descartada';
+
+// Flag resolutions
+$string['resolution_fixed'] = 'Pregunta corregida';
+$string['resolution_no_action'] = 'Sin acción necesaria';
+$string['resolution_duplicate'] = 'Reporte duplicado';
+$string['resolution_dismissed'] = 'Reporte descartado';
+
+// Student UI
+$string['reportquestion'] = 'Reportar pregunta';
+$string['flagmodal_intro'] = '¿Has detectado un problema con esta pregunta? Ayúdanos a mejorar reportándolo aquí. Tu feedback será revisado por el equipo docente.';
+$string['reason'] = 'Motivo del reporte';
+$string['selectreason'] = 'Selecciona un motivo...';
+$string['reasonrequired'] = 'Por favor selecciona un motivo';
+$string['comment'] = 'Comentario (opcional)';
+$string['commentplaceholder'] = 'Describe el problema que has encontrado...';
+$string['commenthelp'] = 'Proporciona detalles adicionales que ayuden a entender el problema.';
+$string['submitflag'] = 'Enviar reporte';
+$string['flagsubmitted'] = '¡Gracias! Tu reporte ha sido enviado y será revisado pronto.';
+$string['alreadyflagged'] = 'Ya has reportado esta pregunta';
+
+// Teacher/Reviewer UI
+$string['flaggedquestions'] = 'Preguntas Reportadas';
+$string['noflaggedquestions'] = '¡Sin preguntas pendientes!';
+$string['noflaggedquestions_desc'] = 'No hay preguntas reportadas que requieran tu atención.';
+$string['filterbystatus'] = 'Filtrar por estado';
+$string['flagcount'] = 'Reportes';
+$string['topreason'] = 'Motivo principal';
+$string['lastflag'] = 'Último reporte';
+$string['viewdetails'] = 'Ver detalles';
+$string['editquestion'] = 'Editar pregunta';
+$string['resolve'] = 'Resolver';
+$string['dismiss'] = 'Descartar';
+$string['resolving'] = 'Resolviendo...';
+$string['dismissing'] = 'Descartando...';
+
+// Details panel
+$string['flagdetails'] = 'Detalles del Reporte';
+$string['totalflags'] = 'Total de reportes';
+$string['studentreports'] = 'Reportes de estudiantes';
+$string['nocomment'] = '(Sin comentario)';
+$string['resolution'] = 'Resolución';
+
+// Resolution modal
+$string['resolutiontype'] = 'Tipo de resolución';
+$string['selectresolution'] = 'Selecciona una resolución...';
+$string['feedbacktostudents'] = 'Feedback para los estudiantes';
+$string['feedbackplaceholder'] = 'Explica qué acción se ha tomado...';
+$string['feedbackhelp'] = 'Este mensaje será enviado a todos los estudiantes que reportaron esta pregunta.';
+$string['flagresolved'] = 'El reporte ha sido resuelto correctamente.';
+$string['flagdismissed'] = 'El reporte ha sido descartado.';
+
+// Notifications
+$string['notification_resolved_subject'] = 'Tu reporte sobre "{$a->questionname}" ha sido resuelto';
+$string['notification_resolved_full'] = 'Tu reporte sobre la pregunta "{$a->questionname}" ha sido revisado y resuelto.\n\nResolución: {$a->resolution}\n\nFeedback del profesor:\n{$a->feedback}';
+$string['notification_resolved_small'] = 'Tu reporte ha sido resuelto';
+
+$string['notification_dismissed_subject'] = 'Tu reporte sobre "{$a->questionname}" ha sido revisado';
+$string['notification_dismissed_full'] = 'Tu reporte sobre la pregunta "{$a->questionname}" ha sido revisado.\n\nRespuesta del profesor:\n{$a->feedback}';
+$string['notification_dismissed_small'] = 'Tu reporte ha sido revisado';
+
+$string['notification_newflag_subject'] = 'Nueva pregunta reportada: {$a->questionname}';
+$string['notification_newflag_full'] = 'Un estudiante ha reportado un problema con la pregunta "{$a->questionname}" (ID: {$a->questionid}).\n\nAccede al panel de reportes para revisar el detalle.';
+$string['notification_newflag_small'] = 'Nueva pregunta reportada';
+
+// Message providers
+$string['messageprovider:flagresolved'] = 'Notificaciones de reportes resueltos';
+$string['messageprovider:flagdismissed'] = 'Notificaciones de reportes descartados';
+$string['messageprovider:newflag'] = 'Notificaciones de nuevos reportes';
+
+// Events
+$string['eventflagcreated'] = 'Pregunta reportada';
+$string['eventflagresolved'] = 'Reporte de pregunta resuelto';
+
+// Errors
+$string['invalidreason'] = 'Motivo de reporte inválido.';
+$string['invalidresolution'] = 'Tipo de resolución inválido.';
+$string['invalidaction'] = 'Acción inválida.';
+$string['questionnotfound'] = 'La pregunta no existe.';
 
 

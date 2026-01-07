@@ -42,4 +42,30 @@ $capabilities = [
         ],
         'riskbitmask' => RISK_SPAM | RISK_XSS,
     ],
+
+    // Flag/report questions capabilities.
+    'local/questions:flag' => [
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => [
+            'student' => CAP_ALLOW,
+            'user' => CAP_ALLOW,
+        ],
+    ],
+    'local/questions:reviewflags' => [
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => [
+            'manager' => CAP_ALLOW,
+            'editingteacher' => CAP_ALLOW,
+        ],
+    ],
+    'local/questions:resolveflags' => [
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => [
+            'manager' => CAP_ALLOW,
+        ],
+        'riskbitmask' => RISK_CONFIG,
+    ],
 ];
