@@ -253,7 +253,8 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
      */
     const editQuestion = function(questionId) {
         // Open Moodle question editor in new tab.
-        const url = M.cfg.wwwroot + '/question/bank/editquestion/question.php?id=' + questionId;
+        // Use question.php with courseid=1 (site) as it doesn't require cmid.
+        const url = M.cfg.wwwroot + '/question/question.php?id=' + questionId + '&courseid=1';
         window.open(url, '_blank');
     };
 
