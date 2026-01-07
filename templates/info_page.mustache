@@ -1,0 +1,16 @@
+{{!
+    This file is part of local_questions.
+
+    @package    local_questions
+    @copyright  2026 Sergio C.
+    @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+}}
+<div class="local_questions_info">
+    <h3>{{#str}} pluginname, local_questions {{/str}}</h3>
+    <p>{{#str}} questions:view, local_questions {{/str}}</p>
+    {{#enable_features}}
+        <div class="alert alert-info">
+            {{#str}} settings, local_questions {{/str}}: {{#str}} pluginname, local_questions {{/str}}
+        </div>
+    {{/enable_features}}
+</div>
