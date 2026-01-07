@@ -1,22 +1,22 @@
 <div class="questions-view">
     <form class="form-inline mb-3 justify-content-between">
         <div class="d-flex align-items-center">
-            <label class="mr-2" for="category-select">Category:</label>
-            <select class="custom-select mr-3" id="category-select" onchange="window.location.href='?tab=questions&cat='+this.value">
-                <option value="0">Choose...</option>
+            <label class="me-2" for="category-select">{{#str}}category, local_questions{{/str}}:</label>
+            <select class="custom-select me-3" id="category-select" onchange="window.location.href='?tab=questions&cat='+this.value">
+                <option value="0">{{#str}}choose, local_questions{{/str}}</option>
                 {{#options}}
                 <option value="{{id}}" {{#selected}}selected{{/selected}}>{{name}}</option>
                 {{/options}}
             </select>
-            
-            <div class="custom-control custom-checkbox mr-3">
+
+            <div class="custom-control custom-checkbox me-3">
                 <input type="checkbox" class="custom-control-input" id="recurse-check" {{#recurse}}checked{{/recurse}} onchange="var url = new URL(window.location.href); url.searchParams.set('recurse', this.checked ? 1 : 0); window.location.href = url.toString();">
-                <label class="custom-control-label" for="recurse-check">Subcategories</label>
+                <label class="custom-control-label" for="recurse-check">{{#str}}subcategories, local_questions{{/str}}</label>
             </div>
         </div>
 
         <div class="d-flex align-items-center">
-             <label class="mr-2" for="perpage-select">Per page:</label>
+             <label class="me-2" for="perpage-select">{{#str}}perpage, local_questions{{/str}}:</label>
              <select class="custom-select" id="perpage-select" onchange="var url = new URL(window.location.href); url.searchParams.set('perpage', this.value); url.searchParams.set('page', 0); window.location.href = url.toString();">
                 {{#perpageoptions}}
                 <option value="{{value}}" {{#selected}}selected{{/selected}}>{{name}}</option>
@@ -26,8 +26,11 @@
     </form>
 
     {{#hasquestions}}
-    <div class="mb-2">
-        {{{pagination}}}
+    <div class="mb-2 d-flex justify-content-between align-items-center">
+        <div>{{{pagination}}}</div>
+        <div class="text-muted">
+            <strong>{{totalcount}}</strong> {{#str}}totalquestionsincategory, local_questions{{/str}}
+        </div>
     </div>
 
     <div class="table-responsive">
@@ -38,10 +41,10 @@
                         <input type="checkbox" id="select-all-questions">
                     </th>
                     <th scope="col" style="width: 50px;">#</th>
-                    <th scope="col">Question Text</th>
-                    <th scope="col">Answers</th>
-                    <th scope="col">Type</th>
-                    <th scope="col" style="width: 100px;">Actions</th>
+                    <th scope="col">{{#str}}questiontext, local_questions{{/str}}</th>
+                    <th scope="col">{{#str}}answers, local_questions{{/str}}</th>
+                    <th scope="col">{{#str}}type, local_questions{{/str}}</th>
+                    <th scope="col" style="width: 100px;">{{#str}}actions, local_questions{{/str}}</th>
                 </tr>
             </thead>
             <tbody>
@@ -51,51 +54,64 @@
                         <input type="checkbox" class="question-checkbox" name="qids[]" value="{{id}}">
                     </td>
                     <td>{{id}}</td>
-                    <td contenteditable="true" class="inplace-edit" data-field="questiontext">{{questiontext}}</td>
+                    <td>
+                        <div contenteditable="true" class="inplace-edit" data-field="questiontext">{{questiontext}}</div>
+                        {{#hasgeneralfeedback}}
+                        <div class="mt-2 p-2 bg-light border-start border-3 border-info small">
+                            <strong class="text-muted">{{#str}}generalfeedback, local_questions{{/str}}:</strong>
+                            <span contenteditable="true" class="inplace-edit" data-field="generalfeedback">{{generalfeedback}}</span>
+                        </div>
+                        {{/hasgeneralfeedback}}
+                    </td>
                     <td>
                         {{#hasanswers}}
                         <ul class="list-unstyled mb-0">
                             {{#answers}}
                             <li class="mb-1">
                                 <span contenteditable="true" class="inplace-edit {{class}}" data-field="answer" data-answerid="{{id}}">{{answer}}</span>
-                                <small class="text-muted d-block pl-2">Feedback: <span contenteditable="true" class="inplace-edit" data-field="feedback" data-answerid="{{id}}">{{feedback}}</span></small>
+                                <small class="text-muted d-block ps-2">Feedback: <span contenteditable="true" class="inplace-edit" data-field="feedback" data-answerid="{{id}}">{{feedback}}</span></small>
                             </li>
                             {{/answers}}
                         </ul>
                         {{/hasanswers}}
                         {{^hasanswers}}
-                        <em class="text-muted">No answers (Description or Manual)</em>
+                        <em class="text-muted">-</em>
                         {{/hasanswers}}
                     </td>
                     <td>{{qtype}}</td>
-                    <td>
-                        <button class="btn btn-sm btn-primary save-row" style="display:none;">Save</button>
+                    <td class="text-nowrap">
+                        <a href="{{editurl}}" class="btn btn-sm btn-outline-secondary me-1" target="_blank" title="{{#str}}editinmoodle, local_questions{{/str}}">
+                            <i class="fa fa-pencil"></i>
+                        </a>
+                        <button class="btn btn-sm btn-primary save-row" style="display:none;" title="{{#str}}save, local_questions{{/str}}">
+                            <i class="fa fa-save"></i>
+                        </button>
                     </td>
                 </tr>
                 {{/questions}}
             </tbody>
         </table>
     </div>
-    
+
     <div class="mt-2 mb-4 d-flex justify-content-between align-items-center">
         <div>
              {{{pagination}}}
         </div>
         <div>
-            <button id="batch-analyze-btn" class="btn btn-info text-white mr-2" disabled>
-                <i class="fa fa-magic"></i> Analyze with AI
+            <button id="batch-analyze-btn" class="btn btn-info text-white me-2" disabled>
+                <i class="fa fa-magic"></i> {{#str}}analyzewith_ai, local_questions{{/str}}
             </button>
-            <button id="batch-save-btn" class="btn btn-success" style="display:none;">Save All Changes</button>
+            <button id="batch-save-btn" class="btn btn-success" style="display:none;">{{#str}}saveallchanges, local_questions{{/str}}</button>
         </div>
     </div>
     {{/hasquestions}}
 
     {{^hasquestions}}
         {{#selectedcategory}}
-        <div class="alert alert-info">No questions found in this category.</div>
+        <div class="alert alert-info">{{#str}}noquestionsfound, local_questions{{/str}}</div>
         {{/selectedcategory}}
         {{^selectedcategory}}
-        <div class="alert alert-warning">Please select a category.</div>
+        <div class="alert alert-warning">{{#str}}pleaseselectcategory, local_questions{{/str}}</div>
         {{/selectedcategory}}
     {{/hasquestions}}
 

@@ -207,13 +207,19 @@ class renderer extends plugin_renderer_base {
                 ];
             }
 
+            // Build edit URL for the question.
+            $editurl = new \moodle_url('/question/bank/editquestion/question.php', ['id' => $q->id]);
+
             $qdata[] = [
                 'id' => $q->id,
                 'name' => $q->name,
                 'questiontext' => strip_tags($q->questiontext),
+                'generalfeedback' => strip_tags($q->generalfeedback ?? ''),
+                'hasgeneralfeedback' => !empty(trim(strip_tags($q->generalfeedback ?? ''))),
                 'qtype' => $q->qtype,
                 'answers' => $answerview,
-                'hasanswers' => !empty($answerview)
+                'hasanswers' => !empty($answerview),
+                'editurl' => $editurl->out(false),
             ];
         }
 
@@ -232,6 +238,7 @@ class renderer extends plugin_renderer_base {
             'options' => $catoptions,
             'hasquestions' => !empty($qdata),
             'questions' => $qdata,
+            'totalcount' => $totalcount,
             'selectedcategory' => $categoryid,
             'recurse' => $recurse,
             'pagination' => $paginationHtml,

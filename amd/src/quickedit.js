@@ -20,11 +20,19 @@ define(['jquery', 'core/ajax', 'core/str', 'core/notification'], function ($, Aj
 
                 // Check for questiontext changes
                 var $qText = $row.find('[data-field="questiontext"]');
-                // Simple dirty check logic would be better but we save what matches existing content for now
                 if ($qText.length) {
                     calls.push({
                         methodname: 'local_questions_save_question_field',
                         args: { questionid: qid, field: 'questiontext', value: $qText.text() }
+                    });
+                }
+
+                // Check for generalfeedback changes
+                var $gFeedback = $row.find('[data-field="generalfeedback"]');
+                if ($gFeedback.length) {
+                    calls.push({
+                        methodname: 'local_questions_save_question_field',
+                        args: { questionid: qid, field: 'generalfeedback', value: $gFeedback.text() }
                     });
                 }
 
@@ -66,10 +74,21 @@ define(['jquery', 'core/ajax', 'core/str', 'core/notification'], function ($, Aj
 
                     // Question Text
                     var $qText = $row.find('[data-field="questiontext"]');
-                    calls.push({
-                        methodname: 'local_questions_save_question_field',
-                        args: { questionid: qid, field: 'questiontext', value: $qText.text() }
-                    });
+                    if ($qText.length) {
+                        calls.push({
+                            methodname: 'local_questions_save_question_field',
+                            args: { questionid: qid, field: 'questiontext', value: $qText.text() }
+                        });
+                    }
+
+                    // General Feedback
+                    var $gFeedback = $row.find('[data-field="generalfeedback"]');
+                    if ($gFeedback.length) {
+                        calls.push({
+                            methodname: 'local_questions_save_question_field',
+                            args: { questionid: qid, field: 'generalfeedback', value: $gFeedback.text() }
+                        });
+                    }
 
                     // Answers
                     $row.find('[data-answerid]').each(function () {

@@ -35,10 +35,10 @@ class question_editor extends external_api {
         require_capability('local/questions:manage', $context);
 
         // Parse field.
-        if ($params['field'] === 'questiontext') {
+        if ($params['field'] === 'questiontext' || $params['field'] === 'generalfeedback') {
             $qUpdate = new \stdClass();
             $qUpdate->id = $params['questionid'];
-            $qUpdate->questiontext = $params['value'];
+            $qUpdate->{$params['field']} = $params['value'];
             $qUpdate->timemodified = time();
             $qUpdate->modifiedby = $USER->id;
             $DB->update_record('question', $qUpdate);

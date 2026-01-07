@@ -31,6 +31,24 @@ $string['questions'] = 'Preguntas';
 $string['export'] = 'Exportar';
 $string['import'] = 'Importar';
 
+// Questions table
+$string['category'] = 'Categoría';
+$string['subcategories'] = 'Subcategorías';
+$string['perpage'] = 'Por página';
+$string['questiontext'] = 'Texto de la pregunta';
+$string['answers'] = 'Respuestas';
+$string['type'] = 'Tipo';
+$string['actions'] = 'Acciones';
+$string['choose'] = 'Seleccionar...';
+$string['analyzewith_ai'] = 'Analizar con IA';
+$string['saveallchanges'] = 'Guardar todos los cambios';
+$string['noquestionsfound'] = 'No se encontraron preguntas en esta categoría.';
+$string['pleaseselectcategory'] = 'Por favor selecciona una categoría.';
+$string['save'] = 'Guardar';
+$string['generalfeedback'] = 'Feedback general';
+$string['totalquestionsincategory'] = 'preguntas en total';
+$string['editinmoodle'] = 'Editar en Moodle';
+
 // Settings
 $string['enable_export'] = 'Habilitar Exportación';
 $string['enable_export_desc'] = 'Permitir a usuarios con capacidad de exportación exportar preguntas a CSV.';
