@@ -1,0 +1,59 @@
+<div class="export-questions-form">
+    <h3>{{#str}}exportquestions, local_questions{{/str}}</h3>
+    
+    <form method="post" action="{{actionurl}}" class="form">
+        <input type="hidden" name="sesskey" value="{{sesskey}}">
+        <input type="hidden" name="action" value="export">
+        
+        <div class="form-group row">
+            <label for="categoryid" class="col-sm-3 col-form-label">{{#str}}selectcategory, local_questions{{/str}}</label>
+            <div class="col-sm-9">
+                <select name="categoryid" id="categoryid" class="custom-select" required>
+                    <option value="">{{#str}}selectcategory, local_questions{{/str}}...</option>
+                    {{#categories}}
+                    <option value="{{id}}" {{#selected}}selected{{/selected}}>{{name}}</option>
+                    {{/categories}}
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label class="col-sm-3 col-form-label">{{#str}}includesubcategories, local_questions{{/str}}</label>
+            <div class="col-sm-9">
+                <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input" id="recurse" name="recurse" value="1">
+                    <label class="custom-control-label" for="recurse">{{#str}}includesubcategories, local_questions{{/str}}</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label for="qtype" class="col-sm-3 col-form-label">{{#str}}filterbytype, local_questions{{/str}}</label>
+            <div class="col-sm-9">
+                <select name="qtype" id="qtype" class="custom-select">
+                    <option value="">{{#str}}alltypes, local_questions{{/str}}</option>
+                    {{#qtypes}}
+                    <option value="{{value}}">{{name}}</option>
+                    {{/qtypes}}
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label for="format" class="col-sm-3 col-form-label">{{#str}}exportformat, local_questions{{/str}}</label>
+            <div class="col-sm-9">
+                <select name="format" id="format" class="custom-select">
+                    <option value="csv" selected>{{#str}}formatcsv, local_questions{{/str}}</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <div class="col-sm-9 offset-sm-3">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa fa-download mr-1"></i>{{#str}}downloadcsv, local_questions{{/str}}
+                </button>
+            </div>
+        </div>
+    </form>
+</div>

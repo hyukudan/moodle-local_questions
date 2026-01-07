@@ -12,6 +12,8 @@ A local plugin for Moodle 5.1 (compatible with 4.1+) that provides enhanced mana
 - **Full Multi-language Support**: English and Spanish included.
 - **Privacy API Compliance**: GDPR-ready with null provider.
 - **Modern Mustache Rendering**: Templates for all UI components.
+- **Export Questions**: Export questions from categories to CSV format with filtering by question type.
+- **Import Questions**: Import questions from CSV files with preview before import.
 
 ## Capabilities
 
@@ -19,7 +21,8 @@ A local plugin for Moodle 5.1 (compatible with 4.1+) that provides enhanced mana
 |------------|-------------|---------------|
 | `local/questions:view` | Access the dashboard | Manager, Editing Teacher |
 | `local/questions:manage` | Manage plugin settings | Manager |
-| `local/questions:export` | Export statistics | Manager, Editing Teacher |
+| `local/questions:export` | Export questions to CSV | Manager, Editing Teacher |
+| `local/questions:import` | Import questions from CSV | Manager |
 
 ## Installation
 
@@ -32,6 +35,32 @@ A local plugin for Moodle 5.1 (compatible with 4.1+) that provides enhanced mana
 | Setting | Description |
 |---------|-------------|
 | `enable_features` | Toggle extended features on/off |
+| `enable_export` | Enable/disable export functionality |
+| `enable_import` | Enable/disable import functionality |
+
+## Export/Import
+
+### Export
+- Navigate to the **Export** tab
+- Select a category and optionally include subcategories
+- Filter by question type if needed
+- Download questions as CSV
+
+### Import
+- Navigate to the **Import** tab
+- Select a target category
+- Upload a CSV file
+- Preview questions before confirming import
+- View import results with any errors
+
+### CSV Format
+The CSV file should have the following columns:
+- `name` - Question name
+- `questiontext` - The question text
+- `qtype` - Question type (multichoice, truefalse, shortanswer)
+- `answers` - Pipe-separated answers (e.g., "Answer1|Answer2|Answer3")
+- `feedback` - Pipe-separated feedback for each answer
+- `fractions` - Pipe-separated fractions (1 for correct, 0 for incorrect)
 
 ## Scheduled Tasks
 

@@ -1,0 +1,112 @@
+<div class="import-questions-form">
+    <h3>{{#str}}importquestions, local_questions{{/str}}</h3>
+    
+    {{#haspreview}}
+    <div class="alert alert-info">
+        <strong>{{#str}}previewimport, local_questions{{/str}}</strong>
+        <p>{{previewcount}} {{#str}}questions, local_questions{{/str}}</p>
+    </div>
+    
+    <div class="table-responsive mb-3">
+        <table class="table table-sm table-bordered">
+            <thead class="thead-light">
+                <tr>
+                    <th>{{#str}}status{{/str}}</th>
+                    <th>Name</th>
+                    <th>Question Text</th>
+                    <th>Type</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#preview}}
+                <tr class="{{#valid}}table-success{{/valid}}{{^valid}}table-warning{{/valid}}">
+                    <td>
+                        {{#valid}}<i class="fa fa-check text-success"></i>{{/valid}}
+                        {{^valid}}<i class="fa fa-exclamation-triangle text-warning"></i>{{/valid}}
+                    </td>
+                    <td>{{name}}</td>
+                    <td>{{questiontext}}</td>
+                    <td><span class="badge badge-secondary">{{qtype}}</span></td>
+                </tr>
+                {{/preview}}
+            </tbody>
+        </table>
+    </div>
+    
+    <form method="post" action="{{actionurl}}">
+        <input type="hidden" name="sesskey" value="{{sesskey}}">
+        <input type="hidden" name="action" value="confirm">
+        <input type="hidden" name="categoryid" value="{{categoryid}}">
+        <input type="hidden" name="draftid" value="{{draftid}}">
+        
+        <button type="submit" class="btn btn-success">
+            <i class="fa fa-check mr-1"></i>{{#str}}confirmimport, local_questions{{/str}}
+        </button>
+        <a href="{{cancelurl}}" class="btn btn-secondary ml-2">{{#str}}cancel{{/str}}</a>
+    </form>
+    {{/haspreview}}
+    
+    {{^haspreview}}
+    <form method="post" action="{{actionurl}}" enctype="multipart/form-data" class="form">
+        <input type="hidden" name="sesskey" value="{{sesskey}}">
+        <input type="hidden" name="action" value="preview">
+        
+        <div class="form-group row">
+            <label for="categoryid" class="col-sm-3 col-form-label">{{#str}}selectcategory, local_questions{{/str}}</label>
+            <div class="col-sm-9">
+                <select name="categoryid" id="categoryid" class="custom-select" required>
+                    <option value="">{{#str}}selectcategory, local_questions{{/str}}...</option>
+                    {{#categories}}
+                    <option value="{{id}}" {{#selected}}selected{{/selected}}>{{name}}</option>
+                    {{/categories}}
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label for="csvfile" class="col-sm-3 col-form-label">{{#str}}csvfile, local_questions{{/str}}</label>
+            <div class="col-sm-9">
+                <input type="file" class="form-control-file" id="csvfile" name="csvfile" accept=".csv" required>
+                <small class="form-text text-muted">{{#str}}csvhelp, local_questions{{/str}}</small>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <div class="col-sm-9 offset-sm-3">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa fa-eye mr-1"></i>{{#str}}previewimport, local_questions{{/str}}
+                </button>
+            </div>
+        </div>
+    </form>
+    {{/haspreview}}
+
+    {{#hasresults}}
+    <div class="import-results mt-4">
+        <h4>{{#str}}importresults, local_questions{{/str}}</h4>
+        
+        {{#imported}}
+        <div class="alert alert-success">
+            <i class="fa fa-check-circle mr-1"></i>{{#str}}questionsimported, local_questions, {{imported}}{{/str}}
+        </div>
+        {{/imported}}
+        
+        {{#skipped}}
+        <div class="alert alert-warning">
+            <i class="fa fa-exclamation-triangle mr-1"></i>{{#str}}questionsskipped, local_questions, {{skipped}}{{/str}}
+        </div>
+        {{/skipped}}
+        
+        {{#haserrors}}
+        <div class="alert alert-danger">
+            <strong>Errors:</strong>
+            <ul class="mb-0 mt-2">
+                {{#errors}}
+                <li>{{.}}</li>
+                {{/errors}}
+            </ul>
+        </div>
+        {{/haserrors}}
+    </div>
+    {{/hasresults}}
+</div>

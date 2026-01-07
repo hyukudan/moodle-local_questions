@@ -19,3 +19,52 @@ $string['features_enabled'] = '¡Funcionalidades habilitadas!';
 $string['questions:manage'] = 'Gestionar administración de preguntas';
 $string['questions:export'] = 'Exportar estadísticas de preguntas';
 $string['task_recalculate_stats'] = 'Recalcular estadísticas de preguntas';
+
+// Tabs
+$string['questions'] = 'Preguntas';
+$string['export'] = 'Exportar';
+$string['import'] = 'Importar';
+
+// Settings
+$string['enable_export'] = 'Habilitar Exportación';
+$string['enable_export_desc'] = 'Permitir a usuarios con capacidad de exportación exportar preguntas a CSV.';
+$string['enable_import'] = 'Habilitar Importación';
+$string['enable_import_desc'] = 'Permitir a usuarios con capacidad de importación importar preguntas desde CSV.';
+
+// Export/Import
+$string['exportquestions'] = 'Exportar Preguntas';
+$string['importquestions'] = 'Importar Preguntas';
+$string['selectcategory'] = 'Seleccionar Categoría';
+$string['selectformat'] = 'Seleccionar Formato';
+$string['downloadcsv'] = 'Descargar CSV';
+$string['downloadxml'] = 'Descargar XML de Moodle';
+$string['uploadfile'] = 'Subir Archivo';
+$string['csvfile'] = 'Archivo CSV';
+$string['previewimport'] = 'Vista Previa de Importación';
+$string['confirmimport'] = 'Confirmar Importación';
+$string['importresults'] = 'Resultados de Importación';
+$string['questionsimported'] = '{$a} preguntas importadas exitosamente.';
+$string['questionsskipped'] = '{$a} preguntas omitidas debido a errores.';
+$string['novalidquestions'] = 'No se encontraron preguntas válidas en el archivo.';
+$string['invalidcsvformat'] = 'Formato CSV inválido. Por favor revise la estructura del archivo.';
+$string['csvhelp'] = 'El CSV debe tener columnas: name, questiontext, qtype, answers (separadas por |), feedback (separadas por |), fractions (separadas por |).';
+$string['includesubcategories'] = 'Incluir subcategorías';
+$string['exportformat'] = 'Formato de Exportación';
+$string['formatcsv'] = 'CSV (Valores Separados por Comas)';
+$string['formatxml'] = 'XML de Moodle';
+$string['questionsexported'] = '{$a} preguntas exportadas.';
+$string['noquestionstoexport'] = 'No hay preguntas para exportar en la categoría seleccionada.';
+
+// Errors
+$string['invalidfield'] = 'Campo inválido especificado para actualización.';
+$string['nocategory'] = 'Por favor seleccione una categoría.';
+$string['nofileselected'] = 'Por favor seleccione un archivo para subir.';
+$string['importerror'] = 'Error importando pregunta: {$a}';
+
+// Capabilities
+$string['questions:import'] = 'Importar preguntas';
+
+// Filter
+$string['filterbytype'] = 'Filtrar por Tipo';
+$string['alltypes'] = 'Todos los Tipos';
+
