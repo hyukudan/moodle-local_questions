@@ -24,28 +24,28 @@
             <i class="fa fa-flag text-warning me-2"></i>
             {{#str}}flaggedquestions, local_questions{{/str}}
         </h4>
-        <div class="btn-group btn-group-sm" role="group" aria-label="{{#str}}filterbystatus, local_questions{{/str}}">
-            <button type="button" class="btn btn-outline-secondary filter-btn {{#filter_all}}active{{/filter_all}}"
+        <div class="d-flex flex-wrap gap-2" role="group" aria-label="{{#str}}filterbystatus, local_questions{{/str}}">
+            <button type="button" class="btn btn-sm btn-outline-secondary filter-btn {{#filter_all}}active{{/filter_all}}"
                     data-filter="all">
                 {{#str}}all{{/str}}
                 <span class="badge bg-secondary ms-1">{{counts.all}}</span>
             </button>
-            <button type="button" class="btn btn-outline-warning filter-btn {{#filter_pending}}active{{/filter_pending}}"
+            <button type="button" class="btn btn-sm btn-outline-warning filter-btn {{#filter_pending}}active{{/filter_pending}}"
                     data-filter="pending">
                 {{#str}}status_pending, local_questions{{/str}}
                 <span class="badge bg-warning text-dark ms-1">{{counts.pending}}</span>
             </button>
-            <button type="button" class="btn btn-outline-info filter-btn {{#filter_reviewing}}active{{/filter_reviewing}}"
+            <button type="button" class="btn btn-sm btn-outline-info filter-btn {{#filter_reviewing}}active{{/filter_reviewing}}"
                     data-filter="reviewing">
                 {{#str}}status_reviewing, local_questions{{/str}}
                 <span class="badge bg-info ms-1">{{counts.reviewing}}</span>
             </button>
-            <button type="button" class="btn btn-outline-success filter-btn {{#filter_resolved}}active{{/filter_resolved}}"
+            <button type="button" class="btn btn-sm btn-outline-success filter-btn {{#filter_resolved}}active{{/filter_resolved}}"
                     data-filter="resolved">
                 {{#str}}status_resolved, local_questions{{/str}}
                 <span class="badge bg-success ms-1">{{counts.resolved}}</span>
             </button>
-            <button type="button" class="btn btn-outline-dark filter-btn {{#filter_dismissed}}active{{/filter_dismissed}}"
+            <button type="button" class="btn btn-sm btn-outline-dark filter-btn {{#filter_dismissed}}active{{/filter_dismissed}}"
                     data-filter="dismissed">
                 {{#str}}status_dismissed, local_questions{{/str}}
                 <span class="badge bg-dark ms-1">{{counts.dismissed}}</span>
