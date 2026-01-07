@@ -82,7 +82,7 @@ class renderer extends plugin_renderer_base {
             if (has_capability('local/questions:reviewflags', $syscontext)) {
                 $counts = \local_questions\flag_manager::count_by_status();
                 $pendingcount = $counts[\local_questions\flag_manager::STATUS_PENDING] ?? 0;
-                $badgehtml = $pendingcount > 0 ? ' <span class="badge badge-warning">' . $pendingcount . '</span>' : '';
+                $badgehtml = $pendingcount > 0 ? ' <span class="badge bg-warning text-dark">' . $pendingcount . '</span>' : '';
                 $tabs['flags'] = [
                     'name' => get_string('flags', 'local_questions') . $badgehtml,
                     'url' => new \moodle_url('/local/questions/index.php', ['tab' => 'flags'])
