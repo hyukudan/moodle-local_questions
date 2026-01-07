@@ -96,25 +96,25 @@
                         <small class="text-muted">{{lastflag_date}}</small>
                     </td>
                     <td class="align-middle">
-                        <div class="btn-group btn-group-sm" role="group">
-                            <button type="button" class="btn btn-outline-primary view-details-btn"
+                        <div class="d-flex gap-1 flex-wrap">
+                            <button type="button" class="btn btn-sm btn-outline-primary view-details-btn"
                                     data-questionid="{{questionid}}"
                                     title="{{#str}}viewdetails, local_questions{{/str}}">
                                 <i class="fa fa-eye"></i>
                             </button>
-                            <button type="button" class="btn btn-outline-secondary edit-question-btn"
+                            <button type="button" class="btn btn-sm btn-outline-secondary edit-question-btn"
                                     data-questionid="{{questionid}}"
                                     title="{{#str}}editquestion, local_questions{{/str}}">
                                 <i class="fa fa-edit"></i>
                             </button>
                             {{#canresolve}}
                             {{#isresolvable}}
-                            <button type="button" class="btn btn-outline-success resolve-btn"
+                            <button type="button" class="btn btn-sm btn-outline-success resolve-btn"
                                     data-questionid="{{questionid}}"
                                     title="{{#str}}resolve, local_questions{{/str}}">
                                 <i class="fa fa-check"></i>
                             </button>
-                            <button type="button" class="btn btn-outline-danger dismiss-btn"
+                            <button type="button" class="btn btn-sm btn-outline-danger dismiss-btn"
                                     data-questionid="{{questionid}}"
                                     title="{{#str}}dismiss, local_questions{{/str}}">
                                 <i class="fa fa-times"></i>
