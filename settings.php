@@ -60,12 +60,12 @@ if ($hassiteconfig) {
         'local_questions/gemini_model',
         get_string('gemini_model', 'local_questions'),
         get_string('gemini_model_desc', 'local_questions'),
-        'gemini-2.0-flash',
+        'gemini-3-flash',
         [
-            'gemini-2.0-flash' => 'Gemini 2.0 Flash (Latest, Fast)',
-            'gemini-2.0-flash-lite' => 'Gemini 2.0 Flash Lite (Fastest, Cheapest)',
-            'gemini-1.5-pro' => 'Gemini 1.5 Pro (Complex Reasoning)',
-            'gemini-1.5-flash' => 'Gemini 1.5 Flash (Legacy)',
+            'gemini-3-flash' => 'Gemini 3 Flash (Fast, Cost-effective)',
+            'gemini-3-pro' => 'Gemini 3 Pro (Complex Reasoning)',
+            'gemini-2.0-flash' => 'Gemini 2.0 Flash (Legacy)',
+            'gemini-1.5-pro' => 'Gemini 1.5 Pro (Legacy)',
         ]
     ));
 
