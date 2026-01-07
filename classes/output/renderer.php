@@ -221,7 +221,8 @@ class renderer extends plugin_renderer_base {
                     }
                 }
             }
-            $editurl = new \moodle_url('/question/bank/editquestion/question.php', [
+            // Use question.php which accepts courseid without requiring cmid.
+            $editurl = new \moodle_url('/question/question.php', [
                 'id' => $q->id,
                 'courseid' => $courseid,
             ]);
