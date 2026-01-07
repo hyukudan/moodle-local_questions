@@ -10,7 +10,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'local_questions';
-$plugin->version   = 2026010700;
-$plugin->requires  = 2022111800; // Moodle 4.1
+$plugin->version   = 2026010701;  // Added db tables, caching, navigation.
+$plugin->requires  = 2022111800;  // Moodle 4.1
 $plugin->maturity  = MATURITY_ALPHA;
-$plugin->release   = '0.1.0';
+$plugin->release   = '0.2.0';

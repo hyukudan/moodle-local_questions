@@ -14,4 +14,12 @@ $observers = [
         'eventname' => '\core\event\question_created',
         'callback'  => '\local_questions\observer::question_created',
     ],
+    [
+        'eventname' => '\core\event\question_deleted',
+        'callback'  => '\local_questions\observer::question_deleted',
+    ],
+    [
+        'eventname' => '\core\event\question_updated',
+        'callback'  => '\local_questions\observer::question_updated',
+    ],
 ];

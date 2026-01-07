@@ -18,4 +18,20 @@ $capabilities = [
             'editingteacher' => CAP_ALLOW,
         ],
     ],
+    'local/questions:manage' => [
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => [
+            'manager' => CAP_ALLOW,
+        ],
+        'riskbitmask' => RISK_CONFIG,
+    ],
+    'local/questions:export' => [
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => [
+            'manager' => CAP_ALLOW,
+            'editingteacher' => CAP_ALLOW,
+        ],
+    ],
 ];

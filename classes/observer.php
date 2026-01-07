@@ -22,16 +22,38 @@ class observer {
      * @param \core\event\question_created $event
      */
     public static function question_created(\core\event\question_created $event): void {
-        // Security check: Ensure user has capability to view questions.
-        // Although this is an event observer, we might want to ensure context.
-        // In Moodle observers often run in the context of the action, but defensive coding is good.
-        if (!is_siteadmin() && !has_capability('local/questions:view', \context_system::instance())) {
-           // We typically don't block events based on caps, but we can return early if not relevant.
-           // However, for auditing, we might want to log regardless.
-        }
+        $eventdata = $event->get_data();
+        $questionid = $eventdata['objectid'];
+        $userid = $eventdata['userid'];
+        $contextid = $eventdata['contextid'];
+        
+        // Log to Moodle's debugging in development mode.
+        debugging("local_questions: Question ID {$questionid} created by user {$userid} in context {$contextid}", DEBUG_DEVELOPER);
+        
+        // Future: Add to custom statistics table or trigger notifications.
+    }
 
-        // Log the question creation or perform actions.
-        $data = $event->get_data();
-        // Custom logic here...
+    /**
+     * Callback for question_deleted event.
+     *
+     * @param \core\event\question_deleted $event
+     */
+    public static function question_deleted(\core\event\question_deleted $event): void {
+        $eventdata = $event->get_data();
+        $questionid = $eventdata['objectid'];
+        
+        debugging("local_questions: Question ID {$questionid} was deleted", DEBUG_DEVELOPER);
+    }
+
+    /**
+     * Callback for question_updated event.
+     *
+     * @param \core\event\question_updated $event
+     */
+    public static function question_updated(\core\event\question_updated $event): void {
+        $eventdata = $event->get_data();
+        $questionid = $eventdata['objectid'];
+        
+        debugging("local_questions: Question ID {$questionid} was updated", DEBUG_DEVELOPER);
     }
 }

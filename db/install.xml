@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="local/questions/db" VERSION="2026010700" COMMENT="local_questions database tables"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="local_questions_stats" COMMENT="Question statistics per category/course">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="categoryid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" COMMENT="Question category ID"/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="false" COMMENT="Course ID if applicable"/>
+        <FIELD NAME="questioncount" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" COMMENT="Number of questions"/>
+        <FIELD NAME="createdcount" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" COMMENT="Questions created this period"/>
+        <FIELD NAME="deletedcount" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" COMMENT="Questions deleted this period"/>
+        <FIELD NAME="updatedcount" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" COMMENT="Questions updated this period"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="categoryid" TYPE="foreign" FIELDS="categoryid" REFTABLE="question_categories" REFFIELDS="id"/>
+        <KEY NAME="courseid" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="categoryid-courseid" UNIQUE="false" FIELDS="categoryid,courseid"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="local_questions_log" COMMENT="Audit log for question events">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="questionid" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="Question ID"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="User who performed action"/>
+        <FIELD NAME="action" TYPE="char" LENGTH="20" NOTNULL="true" COMMENT="Action type: created, updated, deleted"/>
+        <FIELD NAME="contextid" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="Context where action occurred"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="questionid" UNIQUE="false" FIELDS="questionid"/>
+        <INDEX NAME="timecreated" UNIQUE="false" FIELDS="timecreated"/>
+      </INDEXES>
+    </TABLE>
+  </TABLES>
+</XMLDB>

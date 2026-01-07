@@ -24,9 +24,9 @@ $output = $PAGE->get_renderer('local_questions');
 
 // Logic to get data.
 global $DB;
-$total_questions = $DB->count_records('question');
-$enable_features = get_config('local_questions', 'enable_features');
+$totalquestions = $DB->count_records('question');
+$enablefeatures = get_config('local_questions', 'enable_features');
 
 echo $output->header();
-echo $output->render_dashboard($total_questions, (bool)$enable_features);
+echo $output->render_dashboard($totalquestions, (bool)$enablefeatures);
 echo $output->footer();

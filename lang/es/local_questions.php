@@ -15,3 +15,7 @@ $string['enable_features_desc'] = 'Habilitar funcionalidades extendidas para el 
 $string['dashboard'] = 'Tablero de Preguntas';
 $string['totalquestions'] = 'Total de Preguntas';
 $string['privacy:metadata'] = 'El plugin de Gestión de Preguntas no almacena ningún dato personal.';
+$string['features_enabled'] = '¡Funcionalidades habilitadas!';
+$string['questions:manage'] = 'Gestionar administración de preguntas';
+$string['questions:export'] = 'Exportar estadísticas de preguntas';
+$string['task_recalculate_stats'] = 'Recalcular estadísticas de preguntas';

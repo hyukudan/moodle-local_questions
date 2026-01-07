@@ -16,8 +16,8 @@ if ($hassiteconfig) {
 
     $settings->add(new admin_setting_configcheckbox(
         'local_questions/enable_features',
-        get_string('pluginname', 'local_questions'),
-        '',
+        get_string('enable_features', 'local_questions'),
+        get_string('enable_features_desc', 'local_questions'),
         1
     ));
 }

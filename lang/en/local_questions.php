@@ -15,3 +15,7 @@ $string['enable_features_desc'] = 'Enable extended features for the questions pl
 $string['dashboard'] = 'Questions Dashboard';
 $string['totalquestions'] = 'Total Questions';
 $string['privacy:metadata'] = 'The Questions Management plugin does not store any personal data.';
+$string['features_enabled'] = 'Features enabled!';
+$string['questions:manage'] = 'Manage questions administration';
+$string['questions:export'] = 'Export questions statistics';
+$string['task_recalculate_stats'] = 'Recalculate question statistics';
