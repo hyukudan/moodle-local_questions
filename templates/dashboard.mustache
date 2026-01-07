@@ -1,0 +1,23 @@
+{{!
+    This file is part of local_questions.
+
+    @package    local_questions
+    @copyright  2026 Sergio C.
+    @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+}}
+<div class="container-fluid">
+    <h2>{{#str}} dashboard, local_questions {{/str}}</h2>
+    
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">{{#str}} totalquestions, local_questions {{/str}}</h5>
+            <p class="card-text display-4">{{total_questions}}</p>
+        </div>
+    </div>
+
+    {{#enable_features}}
+    <div class="alert alert-success mt-3">
+        Features enabled!
+    </div>
+    {{/enable_features}}
+</div>

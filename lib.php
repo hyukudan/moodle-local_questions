@@ -9,13 +9,4 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-/**
- * Perform any custom actions on plugin installation or upgrade.
- *
- * @param int $oldversion The version we are upgrading from.
- * @return bool
- */
-function xmldb_local_questions_upgrade($oldversion) {
-    // Upgrade logic here if needed in the future.
-    return true;
-}
+

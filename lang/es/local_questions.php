@@ -10,4 +10,8 @@
 $string['pluginname'] = 'Gestión de Preguntas';
 $string['questions:view'] = 'Ver gestión de preguntas';
 $string['settings'] = 'Configuración de Preguntas';
+$string['enable_features'] = 'Habilitar Funcionalidades';
+$string['enable_features_desc'] = 'Habilitar funcionalidades extendidas para el plugin de preguntas.';
+$string['dashboard'] = 'Tablero de Preguntas';
+$string['totalquestions'] = 'Total de Preguntas';
 $string['privacy:metadata'] = 'El plugin de Gestión de Preguntas no almacena ningún dato personal.';

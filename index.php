@@ -1,0 +1,32 @@
+<?php
+/**
+ * Main entry point for local_questions dashboard.
+ *
+ * @package    local_questions
+ * @copyright  2026 Sergio C.
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+require_once(__DIR__ . '/../../config.php');
+
+// Security checks.
+require_login();
+$context = context_system::instance();
+require_capability('local/questions:view', $context);
+
+$PAGE->set_url(new moodle_url('/local/questions/index.php'));
+$PAGE->set_context($context);
+$PAGE->set_title(get_string('pluginname', 'local_questions'));
+$PAGE->set_heading(get_string('dashboard', 'local_questions'));
+
+// Get renderer.
+$output = $PAGE->get_renderer('local_questions');
+
+// Logic to get data.
+global $DB;
+$total_questions = $DB->count_records('question');
+$enable_features = get_config('local_questions', 'enable_features');
+
+echo $output->header();
+echo $output->render_dashboard($total_questions, (bool)$enable_features);
+echo $output->footer();

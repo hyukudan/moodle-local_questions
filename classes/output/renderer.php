@@ -27,4 +27,18 @@ class renderer extends plugin_renderer_base {
         ];
         return $this->render_from_template('local_questions/info_page', $data);
     }
+    /**
+     * Render the dashboard page.
+     *
+     * @param int $total_questions Total number of questions.
+     * @param bool $enable_features Whether features are enabled.
+     * @return string
+     */
+    public function render_dashboard(int $total_questions, bool $enable_features): string {
+        $data = [
+            'total_questions' => $total_questions,
+            'enable_features' => $enable_features,
+        ];
+        return $this->render_from_template('local_questions/dashboard', $data);
+    }
 }

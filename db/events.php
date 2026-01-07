@@ -1,6 +1,6 @@
 <?php
 /**
- * Hooks for local_questions.
+ * Event observers for local_questions.
  *
  * @package    local_questions
  * @copyright  2026 Sergio C.
@@ -9,9 +9,9 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$callbacks = [
+$observers = [
     [
-        'hook' => \core_question\hook\after_question_created::class,
-        'callback' => [\local_questions\hooks_handler::class, 'after_question_created'],
+        'eventname' => '\core\event\question_created',
+        'callback'  => '\local_questions\observer::question_created',
     ],
 ];
