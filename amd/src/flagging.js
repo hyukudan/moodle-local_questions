@@ -127,6 +127,12 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
             submitFlag();
         });
 
+        // Bind close/cancel buttons explicitly for BS5 compatibility.
+        $(document).on('click', '#local-questions-flag-modal [data-bs-dismiss="modal"]', function(e) {
+            e.preventDefault();
+            closeModal('local-questions-flag-modal');
+        });
+
         // Reset modal on close.
         $('#local-questions-flag-modal').on('hidden.bs.modal', function() {
             resetModal();
