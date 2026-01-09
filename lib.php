@@ -68,6 +68,14 @@ function local_questions_get_question_footer($questionid, $context = null, $comp
         return '';
     }
 
+    // Only show flag button in quiz review mode, not during attempt.
+    // Check the current page URL to determine if we're in review mode.
+    $pagepath = $PAGE->url->get_path();
+    if (strpos($pagepath, '/mod/quiz/attempt.php') !== false) {
+        // During quiz attempt - don't show flag button.
+        return '';
+    }
+
     // Check capability.
     $syscontext = context_system::instance();
     if (!has_capability('local/questions:flag', $syscontext)) {

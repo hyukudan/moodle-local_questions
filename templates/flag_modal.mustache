@@ -71,7 +71,7 @@
                         <label for="flag-reason" class="form-label fw-bold">
                             {{#str}}reason, local_questions{{/str}} <span class="text-danger">*</span>
                         </label>
-                        <select class="form-select" id="flag-reason" required>
+                        <select class="form-select" id="flag-reason" name="flag-reason">
                             <option value="">{{#str}}selectreason, local_questions{{/str}}</option>
                             {{#reasons}}
                             <option value="{{value}}">{{label}}</option>
