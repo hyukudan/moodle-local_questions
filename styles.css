@@ -79,6 +79,26 @@
     background: #f8f9fa;
 }
 
+/* Flags table layout - enforce column widths */
+#flags-table {
+    table-layout: fixed;
+}
+
+#flags-table td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Truncate long reason badges */
+#flags-table .badge {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+    vertical-align: middle;
+}
+
 /* Responsive improvements */
 @media (max-width: 768px) {
     .questions-view .form-inline {
