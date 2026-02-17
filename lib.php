@@ -82,11 +82,20 @@ function local_questions_get_question_footer($questionid, $context = null, $comp
         return '';
     }
 
-    // Check if user already flagged this question.
-    $alreadyflagged = $DB->record_exists('local_questions_flags', [
-        'questionid' => $questionid,
-        'userid' => $USER->id,
-    ]);
+    // Batch-load ALL flags for this user (1 query for the entire page instead of 1 per question).
+    static $flagcache = null;
+    static $flagcache_userid = null;
+    if ($flagcache === null || $flagcache_userid !== $USER->id) {
+        $flagcache = $DB->get_records_menu(
+            'local_questions_flags',
+            ['userid' => $USER->id],
+            '',
+            'questionid, id'
+        );
+        $flagcache_userid = $USER->id;
+    }
+
+    $alreadyflagged = isset($flagcache[$questionid]);
 
     // Load JS module.
     $PAGE->requires->js_call_amd('local_questions/flagging', 'init');
