@@ -190,10 +190,22 @@ class renderer extends plugin_renderer_base {
             $questions = $DB->get_records_sql($selectsql, $inparams);
         }
 
+        // Batch-load all answers for these questions (avoids N+1 queries).
+        $allanswers = [];
+        if (!empty($questions)) {
+            $questionids = array_keys($questions);
+            list($insql, $ansparams) = $DB->get_in_or_equal($questionids);
+            $answersraw = $DB->get_records_select('question_answers',
+                "question $insql", $ansparams, 'question ASC, id ASC');
+            foreach ($answersraw as $a) {
+                $allanswers[$a->question][] = $a;
+            }
+        }
+
         $qdata = [];
         foreach ($questions as $q) {
-            // Fetch answers.
-            $answers = $DB->get_records('question_answers', ['question' => $q->id], 'id ASC');
+            // Use batch-loaded answers.
+            $answers = $allanswers[$q->id] ?? [];
             $answerview = [];
             foreach ($answers as $a) {
                 $iscorrect = $a->fraction > 0.9;
@@ -413,6 +425,20 @@ class renderer extends plugin_renderer_base {
         // Fetch all categories.
         $categories = $DB->get_records('question_categories', null, 'parent ASC, sortorder ASC, name ASC', 'id, name, parent');
 
+        // Fetch question counts per category in a single query.
+        $countssql = "SELECT qbe.questioncategoryid, COUNT(DISTINCT q.id) as questioncount
+                        FROM {question} q
+                        JOIN {question_versions} qv ON qv.questionid = q.id
+                        JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid
+                       WHERE qv.status = 'ready'
+                         AND qv.version = (
+                             SELECT MAX(qv2.version)
+                               FROM {question_versions} qv2
+                              WHERE qv2.questionbankentryid = qv.questionbankentryid
+                         )
+                    GROUP BY qbe.questioncategoryid";
+        $counts = $DB->get_records_sql_menu($countssql);
+
         // Build tree structure.
         $tree = [];
         $lookup = [];
@@ -421,7 +447,8 @@ class renderer extends plugin_renderer_base {
                 'id' => $cat->id,
                 'name' => format_string($cat->name),
                 'parent' => $cat->parent,
-                'children' => []
+                'children' => [],
+                'questioncount' => (int)($counts[$cat->id] ?? 0),
             ];
         }
 
@@ -461,10 +488,11 @@ class renderer extends plugin_renderer_base {
     private function flatten_category_tree(array $tree, array &$options, int $depth, int $selectedid): void {
         foreach ($tree as $cat) {
             $indent = str_repeat('— ', $depth);
+            $count = $cat['questioncount'] ?? 0;
             $options[] = [
                 'id' => $cat['id'],
-                'name' => $indent . $cat['name'],
-                'selected' => $cat['id'] == $selectedid
+                'name' => $indent . $cat['name'] . ' (' . $count . ')',
+                'selected' => $cat['id'] == $selectedid,
             ];
             if (!empty($cat['children'])) {
                 $this->flatten_category_tree($cat['children'], $options, $depth + 1, $selectedid);
