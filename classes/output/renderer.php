@@ -117,7 +117,8 @@ class renderer extends plugin_renderer_base {
      * @param int $perpage Number of items per page.
      * @return string
      */
-    public function render_questions_view(int $categoryid, bool $recurse = false, int $page = 0, int $perpage = 20): string {
+    public function render_questions_view(int $categoryid, bool $recurse = false, int $page = 0, int $perpage = 20,
+            string $search = '', string $sort = 'id_asc'): string {
         global $DB, $CFG;
 
         // Fetch categories with hierarchy and "All" option.
@@ -146,6 +147,26 @@ class renderer extends plugin_renderer_base {
             $categorywhere = '';
         }
 
+        // Build WHERE clause for search filtering.
+        $searchwhere = '';
+        if (!empty($search)) {
+            $searchterm = '%' . $DB->sql_like_escape($search) . '%';
+            $searchwhere = "AND " . $DB->sql_like('q.questiontext', ':searchterm', false);
+            $inparams['searchterm'] = $searchterm;
+        }
+
+        // Build ORDER BY clause.
+        $validorders = [
+            'id_asc' => 'q.id ASC',
+            'id_desc' => 'q.id DESC',
+            'name_asc' => 'q.name ASC',
+            'name_desc' => 'q.name DESC',
+            'type_asc' => 'q.qtype ASC, q.id ASC',
+            'modified_desc' => 'q.timemodified DESC',
+            'modified_asc' => 'q.timemodified ASC',
+        ];
+        $orderby = $validorders[$sort] ?? $validorders['id_asc'];
+
         // Moodle 4.x: question.category moved to question_bank_entries.questioncategoryid
         // We need to JOIN through question_versions to get questions in a category.
         $countsql = "SELECT COUNT(DISTINCT q.id)
@@ -153,7 +174,8 @@ class renderer extends plugin_renderer_base {
                        JOIN {question_versions} qv ON qv.questionid = q.id
                        JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid
                       WHERE qv.status = 'ready'
-                        $categorywhere";
+                        $categorywhere
+                        $searchwhere";
 
         $totalcount = $DB->count_records_sql($countsql, $inparams);
 
@@ -166,24 +188,30 @@ class renderer extends plugin_renderer_base {
                         JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
                        WHERE qv.status = 'ready'
                          $categorywhere
+                         $searchwhere
                          AND qv.version = (
                              SELECT MAX(qv2.version)
                                FROM {question_versions} qv2
                               WHERE qv2.questionbankentryid = qv.questionbankentryid
                          )
-                    ORDER BY q.id ASC";
+                    ORDER BY $orderby";
 
         // Get paged records.
         if ($perpage > 0) {
             $questions = $DB->get_records_sql($selectsql, $inparams, $page * $perpage, $perpage);
 
             // Render pagination bar.
-            $baseurl = new \moodle_url('/local/questions/index.php', [
+            $baseparams = [
                 'tab' => 'questions',
                 'cat' => $categoryid,
                 'recurse' => $recurse,
-                'perpage' => $perpage
-            ]);
+                'perpage' => $perpage,
+                'sort' => $sort,
+            ];
+            if (!empty($search)) {
+                $baseparams['search'] = $search;
+            }
+            $baseurl = new \moodle_url('/local/questions/index.php', $baseparams);
             $paginationHtml = $this->render(new \paging_bar($totalcount, $page, $perpage, $baseurl));
         } else {
             // Show all.
@@ -259,6 +287,25 @@ class renderer extends plugin_renderer_base {
             ];
         }
 
+        // Sort options.
+        $sortkeys = [
+            'id_asc' => get_string('sort_id_asc', 'local_questions'),
+            'id_desc' => get_string('sort_id_desc', 'local_questions'),
+            'name_asc' => get_string('sort_name_asc', 'local_questions'),
+            'name_desc' => get_string('sort_name_desc', 'local_questions'),
+            'type_asc' => get_string('sort_type', 'local_questions'),
+            'modified_desc' => get_string('sort_modified_desc', 'local_questions'),
+            'modified_asc' => get_string('sort_modified_asc', 'local_questions'),
+        ];
+        $sortview = [];
+        foreach ($sortkeys as $key => $label) {
+            $sortview[] = [
+                'value' => $key,
+                'name' => $label,
+                'selected' => $sort === $key,
+            ];
+        }
+
         $data = [
             'options' => $catoptions,
             'hasquestions' => !empty($qdata),
@@ -267,7 +314,9 @@ class renderer extends plugin_renderer_base {
             'selectedcategory' => $categoryid,
             'recurse' => $recurse,
             'pagination' => $paginationHtml,
-            'perpageoptions' => $perpageview
+            'perpageoptions' => $perpageview,
+            'sortoptions' => $sortview,
+            'searchterm' => $search,
         ];
 
         return $this->render_from_template('local_questions/questions_table', $data);

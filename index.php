@@ -39,7 +39,9 @@ switch ($tab) {
         $recurse = optional_param('recurse', 0, PARAM_BOOL);
         $page = optional_param('page', 0, PARAM_INT);
         $perpage = optional_param('perpage', 20, PARAM_INT);
-        echo $output->render_questions_view($categoryid, $recurse, $page, $perpage);
+        $search = optional_param('search', '', PARAM_TEXT);
+        $sort = optional_param('sort', 'id_asc', PARAM_ALPHANUMEXT);
+        echo $output->render_questions_view($categoryid, $recurse, $page, $perpage, $search, $sort);
         break;
     case 'flags':
         require_capability('local/questions:reviewflags', $context);

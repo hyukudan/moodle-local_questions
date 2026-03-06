@@ -237,4 +237,24 @@ $string['answerfeedback'] = 'Answer feedback';
 $string['savechanges'] = 'Save changes';
 $string['savingchanges'] = 'Saving changes...';
 
+// Fraction editing
+$string['answerfraction'] = 'Score';
+$string['selectcorrectanswer_fractions'] = 'Select the correct answer and adjust scores. When changing the correct answer, scores update automatically (100% for correct, -33.33% for incorrect).';
+
+// Search and Sort
+$string['searchplaceholder'] = 'Search questions...';
+$string['clearsearch'] = 'Clear search';
+$string['sortby'] = 'Sort';
+$string['sort_id_asc'] = 'ID ↑';
+$string['sort_id_desc'] = 'ID ↓';
+$string['sort_name_asc'] = 'Name A-Z';
+$string['sort_name_desc'] = 'Name Z-A';
+$string['sort_type'] = 'Type';
+$string['sort_modified_desc'] = 'Newest first';
+$string['sort_modified_asc'] = 'Oldest first';
+
+// PDF Export
+$string['formatpdf'] = 'PDF Document';
+$string['downloadpdf'] = 'Download PDF';
+
 
