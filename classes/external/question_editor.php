@@ -62,6 +62,24 @@ class question_editor extends external_api {
             $qUpdate->modifiedby = $USER->id;
             $DB->update_record('question', $qUpdate);
 
+        } else if (preg_match('/^fraction:(\d+)$/', $params['field'], $matches)) {
+            $answerid = $matches[1];
+
+            // Validate answer belongs to question.
+            $answer = $DB->get_record('question_answers', ['id' => $answerid, 'question' => $params['questionid']], '*', MUST_EXIST);
+
+            $aUpdate = new \stdClass();
+            $aUpdate->id = $answer->id;
+            $aUpdate->fraction = floatval($params['value']);
+            $DB->update_record('question_answers', $aUpdate);
+
+            // Touch question modification time.
+            $qUpdate = new \stdClass();
+            $qUpdate->id = $params['questionid'];
+            $qUpdate->timemodified = time();
+            $qUpdate->modifiedby = $USER->id;
+            $DB->update_record('question', $qUpdate);
+
         } else if ($params['field'] === 'correctanswer') {
             // Change which answer is correct.
             // Set the selected answer to fraction 1.0 and all others to -0.3333333.

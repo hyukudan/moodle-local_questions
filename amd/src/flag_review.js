@@ -312,6 +312,26 @@ function($, Ajax, Notification, Str) {
     };
 
     /**
+     * Find the closest fraction option value for a given fraction.
+     *
+     * @param {number} fraction The fraction value
+     * @return {string} The closest option value as string
+     */
+    const closestFraction = function(fraction) {
+        const options = [1, 0.9, 0.8333333, 0.8, 0.75, 0.7, 0.6666667, 0.6, 0.5, 0.4, 0.3333333, 0.3, 0.25, 0.2, 0.1666667, 0.1428571, 0.125, 0.1111111, 0.1, 0.05, 0, -0.05, -0.1, -0.1111111, -0.125, -0.1428571, -0.1666667, -0.2, -0.25, -0.3, -0.3333333, -0.4, -0.5, -0.6, -0.6666667, -0.7, -0.75, -0.8, -0.8333333, -0.9, -1];
+        var closest = options[0];
+        var minDiff = Math.abs(fraction - closest);
+        for (var i = 1; i < options.length; i++) {
+            var diff = Math.abs(fraction - options[i]);
+            if (diff < minDiff) {
+                minDiff = diff;
+                closest = options[i];
+            }
+        }
+        return String(closest);
+    };
+
+    /**
      * Format Unix timestamp to readable date.
      *
      * @param {number} timestamp Unix timestamp
@@ -382,9 +402,25 @@ function($, Ajax, Notification, Str) {
                 }
                 $item.find('.answer-text').val(stripHtml(answer.answer));
                 $item.find('.answer-feedback').val(stripHtml(answer.feedback || ''));
+                // Set fraction value - find the closest matching option.
+                var fraction = parseFloat(answer.fraction);
+                $item.find('.answer-fraction').val(closestFraction(fraction));
                 $container.append($item);
             });
         }
+
+        // When correct answer radio changes, auto-update fractions.
+        $container.find('.correct-answer-radio').on('change', function() {
+            var $selectedItem = $(this).closest('.answer-item');
+            $container.find('.answer-item').each(function() {
+                var $item = $(this);
+                if ($item.is($selectedItem)) {
+                    $item.find('.answer-fraction').val('1');
+                } else {
+                    $item.find('.answer-fraction').val('-0.3333333');
+                }
+            });
+        });
 
         // Hide loading, show content.
         $('#edit-loading').addClass('d-none');
@@ -423,7 +459,6 @@ function($, Ajax, Notification, Str) {
         });
 
         // Answers.
-        const selectedCorrectId = $('input[name="correct-answer"]:checked').val();
         $('#edit-answers-container .answer-item').each(function() {
             const $item = $(this);
             const answerId = $item.data('answerid');
@@ -441,15 +476,14 @@ function($, Ajax, Notification, Str) {
                 methodname: 'local_questions_save_question_field',
                 args: {questionid: parseInt(questionId), field: 'feedback:' + answerId, value: answerFeedback}
             });
-        });
 
-        // If correct answer changed, update fractions.
-        if (selectedCorrectId) {
+            // Save answer fraction.
+            var fractionValue = $item.find('.answer-fraction').val();
             calls.push({
                 methodname: 'local_questions_save_question_field',
-                args: {questionid: parseInt(questionId), field: 'correctanswer', value: selectedCorrectId}
+                args: {questionid: parseInt(questionId), field: 'fraction:' + answerId, value: fractionValue}
             });
-        }
+        });
 
         // Execute all calls.
         const promises = Ajax.call(calls);

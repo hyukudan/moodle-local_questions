@@ -40,7 +40,11 @@ if ($action === 'export' && confirm_sesskey()) {
         $filters['qtype'] = $qtype;
     }
 
-    $result = question_io::export_to_csv($categoryid, $recurse, $filters);
+    if ($format === 'pdf') {
+        $result = question_io::export_to_pdf($categoryid, $recurse, $filters);
+    } else {
+        $result = question_io::export_to_csv($categoryid, $recurse, $filters);
+    }
 
     if ($result['count'] === 0) {
         redirect(
@@ -53,14 +57,20 @@ if ($action === 'export' && confirm_sesskey()) {
 
     // Get category name for filename.
     $category = $DB->get_record('question_categories', ['id' => $categoryid], 'name');
-    $filename = clean_filename('questions_' . ($category ? $category->name : $categoryid) . '_' . date('Ymd_His') . '.csv');
+    $catname = $category ? $category->name : $categoryid;
 
-    // Send file download.
-    header('Content-Type: text/csv; charset=utf-8');
+    if ($format === 'pdf') {
+        $filename = clean_filename('questions_' . $catname . '_' . date('Ymd_His') . '.pdf');
+        header('Content-Type: application/pdf');
+    } else {
+        $filename = clean_filename('questions_' . $catname . '_' . date('Ymd_His') . '.csv');
+        header('Content-Type: text/csv; charset=utf-8');
+    }
+
     header('Content-Disposition: attachment; filename="' . $filename . '"');
     header('Content-Length: ' . strlen($result['data']));
     header('Cache-Control: no-cache, no-store, must-revalidate');
-    
+
     echo $result['data'];
     exit;
 }

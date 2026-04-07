@@ -64,6 +64,16 @@ class question_io {
             return ['data' => '', 'count' => 0];
         }
 
+        // Batch-load all answers.
+        $questionids = array_keys($questions);
+        list($qinsql, $qinparams) = $DB->get_in_or_equal($questionids);
+        $allanswers = $DB->get_records_select('question_answers', "question $qinsql", $qinparams, 'question ASC, id ASC');
+        $answersbyquestion = [];
+        foreach ($allanswers as $a) {
+            $answersbyquestion[$a->question][] = $a;
+        }
+        unset($allanswers);
+
         // Build CSV.
         $output = fopen('php://temp', 'r+');
         
@@ -82,7 +92,7 @@ class question_io {
 
         foreach ($questions as $q) {
             // Get answers for this question.
-            $answers = $DB->get_records('question_answers', ['question' => $q->id], 'id ASC');
+            $answers = $answersbyquestion[$q->id] ?? [];
             
             $answerTexts = [];
             $feedbackTexts = [];
@@ -112,6 +122,221 @@ class question_io {
         fclose($output);
 
         return ['data' => $csv, 'count' => count($questions)];
+    }
+
+    /**
+     * Export questions from a category to PDF format.
+     *
+     * @param int $categoryid The category ID to export from.
+     * @param bool $recurse Whether to include subcategories.
+     * @param array $filters Optional filters (qtype, etc).
+     * @return array Array with 'data' (PDF binary string) and 'count' (number of questions).
+     */
+    public static function export_to_pdf(int $categoryid, bool $recurse = false, array $filters = []): array {
+        global $CFG, $DB, $USER;
+
+        require_once($CFG->libdir . '/pdflib.php');
+
+        // Raise limits for large exports - TCPDF is memory intensive.
+        raise_memory_limit(MEMORY_EXTRA);
+        \core_php_time_limit::raise(300);
+
+        $catids = [$categoryid];
+        if ($recurse) {
+            $catids = array_merge($catids, self::get_subcategory_ids($categoryid));
+        }
+
+        list($insql, $inparams) = $DB->get_in_or_equal($catids);
+
+        $sql = "SELECT q.*
+                  FROM {question} q
+                  JOIN {question_versions} qv ON qv.questionid = q.id
+                  JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid
+                 WHERE qbe.questioncategoryid $insql
+                   AND qv.version = (
+                       SELECT MAX(qv2.version)
+                         FROM {question_versions} qv2
+                        WHERE qv2.questionbankentryid = qv.questionbankentryid
+                   )";
+
+        if (!empty($filters['qtype'])) {
+            $sql .= " AND q.qtype = ?";
+            $inparams[] = $filters['qtype'];
+        }
+
+        $sql .= " ORDER BY q.id ASC";
+
+        $questions = $DB->get_records_sql($sql, $inparams);
+
+        if (empty($questions)) {
+            return ['data' => '', 'count' => 0];
+        }
+
+        // Batch-load all answers for all questions in a single query.
+        $questionids = array_keys($questions);
+        list($qinsql, $qinparams) = $DB->get_in_or_equal($questionids);
+        $allanswers = $DB->get_records_select('question_answers', "question $qinsql", $qinparams, 'question ASC, id ASC');
+
+        // Group answers by question ID.
+        $answersbyquestion = [];
+        foreach ($allanswers as $a) {
+            $answersbyquestion[$a->question][] = $a;
+        }
+        unset($allanswers); // Free memory.
+
+        // Get category name for title.
+        $category = $DB->get_record('question_categories', ['id' => $categoryid], 'name');
+        $categoryname = $category ? $category->name : '';
+
+        // Initialize PDF.
+        $pdf = new \pdf('P', 'mm', 'A4', true, 'UTF-8');
+        $pdf->SetCreator('Moodle - Questions Management');
+        $pdf->SetAuthor(fullname($USER));
+        $pdf->SetTitle(get_string('exportquestions', 'local_questions') . ' - ' . $categoryname);
+
+        $pdf->SetMargins(15, 20, 15);
+        $pdf->SetAutoPageBreak(true, 20);
+        $pdf->setPrintHeader(false);
+        $pdf->setPrintFooter(true);
+
+        $pdf->AddPage();
+
+        // Title.
+        $pdf->SetFont('helvetica', 'B', 16);
+        $pdf->SetTextColor(0, 51, 102);
+        $pdf->Cell(0, 10, get_string('exportquestions', 'local_questions'), 0, 1);
+
+        if ($categoryname) {
+            $pdf->SetFont('helvetica', 'I', 10);
+            $pdf->SetTextColor(128, 128, 128);
+            $pdf->Cell(0, 6, get_string('category', 'local_questions') . ': ' . $categoryname . ' | ' . count($questions) . ' ' . get_string('questions', 'local_questions'), 0, 1);
+        }
+
+        $pdf->SetFont('helvetica', '', 10);
+        $pdf->SetTextColor(128, 128, 128);
+        $pdf->Cell(0, 6, userdate(time()), 0, 1);
+
+        $pdf->Ln(3);
+        $pdf->SetDrawColor(200, 200, 200);
+        $pdf->Line(15, $pdf->GetY(), 195, $pdf->GetY());
+        $pdf->Ln(5);
+
+        $letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+        $qnum = 1;
+
+        foreach ($questions as $q) {
+            $answers = $answersbyquestion[$q->id] ?? [];
+
+            // Check if we need a page break (estimate: question needs at least 40mm).
+            if ($pdf->GetY() > 240) {
+                $pdf->AddPage();
+            }
+
+            // Question number and text.
+            $pdf->SetFont('helvetica', 'B', 11);
+            $pdf->SetTextColor(0, 0, 0);
+
+            $questiontext = strip_tags(format_text($q->questiontext, FORMAT_HTML));
+            $pdf->MultiCell(0, 6, $qnum . '. ' . $questiontext, 0, 'L');
+            $pdf->Ln(2);
+
+            // Answers.
+            $anum = 0;
+            foreach ($answers as $a) {
+                $letter = $letters[$anum] ?? chr(65 + $anum);
+                $answertext = strip_tags($a->answer);
+                $iscorrect = $a->fraction > 0;
+
+                if ($iscorrect) {
+                    $pdf->SetFont('helvetica', 'B', 10);
+                    $pdf->SetTextColor(0, 128, 0);
+                    $fractionLabel = ' [' . self::format_fraction($a->fraction) . ']';
+                } else {
+                    $pdf->SetFont('helvetica', '', 10);
+                    $pdf->SetTextColor(64, 64, 64);
+                    $fractionLabel = ' [' . self::format_fraction($a->fraction) . ']';
+                }
+
+                $pdf->Cell(8, 5, '', 0, 0); // Indent.
+                $pdf->MultiCell(0, 5, $letter . ') ' . $answertext . $fractionLabel, 0, 'L');
+
+                $anum++;
+            }
+
+            $pdf->Ln(2);
+
+            // Feedback section.
+            $hasFeedback = false;
+            foreach ($answers as $a) {
+                $feedback = strip_tags($a->feedback ?? '');
+                if (!empty(trim($feedback))) {
+                    $hasFeedback = true;
+                    break;
+                }
+            }
+
+            if ($hasFeedback || !empty(trim(strip_tags($q->generalfeedback ?? '')))) {
+                $pdf->SetDrawColor(220, 220, 220);
+                $pdf->SetFillColor(248, 249, 250);
+
+                // Save position for background box.
+                $startY = $pdf->GetY();
+                $startPage = $pdf->getPage();
+
+                $pdf->SetFont('helvetica', 'B', 9);
+                $pdf->SetTextColor(100, 100, 100);
+                $pdf->Cell(8, 5, '', 0, 0);
+                $pdf->Cell(0, 5, 'Feedback:', 0, 1);
+
+                // Per-answer feedback.
+                $anum = 0;
+                foreach ($answers as $a) {
+                    $feedback = strip_tags($a->feedback ?? '');
+                    if (!empty(trim($feedback))) {
+                        $letter = $letters[$anum] ?? chr(65 + $anum);
+                        $pdf->SetFont('helvetica', 'I', 9);
+                        $pdf->SetTextColor(120, 120, 120);
+                        $pdf->Cell(12, 4, '', 0, 0);
+                        $pdf->MultiCell(0, 4, $letter . ') ' . $feedback, 0, 'L');
+                    }
+                    $anum++;
+                }
+
+                // General feedback.
+                $generalfeedback = strip_tags($q->generalfeedback ?? '');
+                if (!empty(trim($generalfeedback))) {
+                    $pdf->SetFont('helvetica', 'I', 9);
+                    $pdf->SetTextColor(100, 100, 100);
+                    $pdf->Cell(8, 4, '', 0, 0);
+                    $pdf->MultiCell(0, 4, get_string('generalfeedback', 'local_questions') . ': ' . $generalfeedback, 0, 'L');
+                }
+            }
+
+            // Separator line.
+            $pdf->Ln(3);
+            $pdf->SetDrawColor(230, 230, 230);
+            $pdf->Line(15, $pdf->GetY(), 195, $pdf->GetY());
+            $pdf->Ln(5);
+
+            $qnum++;
+        }
+
+        $content = $pdf->Output('', 'S');
+        return ['data' => $content, 'count' => count($questions)];
+    }
+
+    /**
+     * Format a fraction value as a percentage string.
+     *
+     * @param float $fraction The fraction value.
+     * @return string Formatted percentage (e.g. "100%", "-33,33%").
+     */
+    private static function format_fraction(float $fraction): string {
+        $pct = round($fraction * 100, 2);
+        if ($pct == intval($pct)) {
+            return intval($pct) . '%';
+        }
+        return str_replace('.', ',', number_format($pct, 2)) . '%';
     }
 
     /**

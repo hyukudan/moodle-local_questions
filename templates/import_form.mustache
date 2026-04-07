@@ -54,7 +54,7 @@
         <div class="form-group row">
             <label for="categoryid" class="col-sm-3 col-form-label">{{#str}}selectcategory, local_questions{{/str}}</label>
             <div class="col-sm-9">
-                <select name="categoryid" id="categoryid" class="custom-select" required>
+                <select name="categoryid" id="categoryid" class="form-select" required>
                     <option value="">{{#str}}selectcategory, local_questions{{/str}}...</option>
                     {{#categories}}
                     <option value="{{id}}" {{#selected}}selected{{/selected}}>{{name}}</option>
