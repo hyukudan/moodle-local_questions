@@ -15,6 +15,9 @@ class gemini_client {
     /** @var string API endpoint template (key passed via header for security). */
     private const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent';
 
+    /** @var string Fallback model when primary fails */
+    private const FALLBACK_MODEL = 'gemini-2.5-flash';
+
     /**
      * Analyze a batch of questions using Gemini.
      *
@@ -65,7 +68,17 @@ class gemini_client {
 
         $url = str_replace('{model}', $model, self::API_URL);
 
-        return $this->call_api($url, $payload, $apikey);
+        try {
+            return $this->call_api($url, $payload, $apikey);
+        } catch (\moodle_exception $e) {
+            if ($model === self::FALLBACK_MODEL) {
+                throw $e;
+            }
+            debugging("Gemini model {$model} failed: " . $e->getMessage()
+                . ". Falling back to " . self::FALLBACK_MODEL, DEBUG_DEVELOPER);
+            $fallbackurl = str_replace('{model}', self::FALLBACK_MODEL, self::API_URL);
+            return $this->call_api($fallbackurl, $payload, $apikey);
+        }
     }
 
     /**
