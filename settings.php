@@ -42,6 +42,18 @@ if ($hassiteconfig) {
         1
     ));
 
+    // Threshold above which the PDF export is dispatched as an ad-hoc task
+    // and the file is delivered to the user via private files + notification.
+    // Synchronous TCPDF generation can blow the request memory/time limits
+    // for large categories. Set to 0 to always use the synchronous path.
+    $settings->add(new admin_setting_configtext(
+        'local_questions/pdf_async_threshold',
+        get_string('pdf_async_threshold', 'local_questions'),
+        get_string('pdf_async_threshold_desc', 'local_questions'),
+        2000,
+        PARAM_INT
+    ));
+
     // Gemini AI Settings
     $settings->add(new admin_setting_heading(
         'local_questions/gemini_heading',

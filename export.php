@@ -40,7 +40,51 @@ if ($action === 'export' && confirm_sesskey()) {
         $filters['qtype'] = $qtype;
     }
 
+    // Get category name for filename / async notifications.
+    $category = $DB->get_record('question_categories', ['id' => $categoryid], 'name');
+    $catname = $category ? $category->name : $categoryid;
+
+    // For PDF exports we may need to dispatch to an ad-hoc task: TCPDF is
+    // memory-hungry and large categories can blow the request limits even with
+    // raise_memory_limit(MEMORY_EXTRA). Decide based on a cheap COUNT.
     if ($format === 'pdf') {
+        $threshold = (int)get_config('local_questions', 'pdf_async_threshold');
+        if ($threshold < 0) {
+            $threshold = 0;
+        }
+
+        $expected = question_io::count_for_export($categoryid, $recurse, $filters);
+
+        if ($expected === 0) {
+            redirect(
+                new moodle_url('/local/questions/index.php', ['tab' => 'export']),
+                get_string('noquestionstoexport', 'local_questions'),
+                null,
+                \core\output\notification::NOTIFY_WARNING
+            );
+        }
+
+        if ($threshold > 0 && $expected > $threshold) {
+            // Queue ad-hoc task; user will be notified when the PDF is ready.
+            $task = new \local_questions\task\export_pdf_task();
+            $task->set_userid($USER->id);
+            $task->set_custom_data([
+                'categoryid'   => $categoryid,
+                'recurse'      => $recurse ? 1 : 0,
+                'filters'      => $filters,
+                'categoryname' => $catname,
+            ]);
+            \core\task\manager::queue_adhoc_task($task);
+
+            redirect(
+                new moodle_url('/local/questions/index.php', ['tab' => 'export']),
+                get_string('exportpdf_queued', 'local_questions',
+                    (object)['count' => $expected]),
+                null,
+                \core\output\notification::NOTIFY_SUCCESS
+            );
+        }
+
         $result = question_io::export_to_pdf($categoryid, $recurse, $filters);
     } else {
         $result = question_io::export_to_csv($categoryid, $recurse, $filters);
@@ -54,10 +98,6 @@ if ($action === 'export' && confirm_sesskey()) {
             \core\output\notification::NOTIFY_WARNING
         );
     }
-
-    // Get category name for filename.
-    $category = $DB->get_record('question_categories', ['id' => $categoryid], 'name');
-    $catname = $category ? $category->name : $categoryid;
 
     if ($format === 'pdf') {
         $filename = clean_filename('questions_' . $catname . '_' . date('Ymd_His') . '.pdf');

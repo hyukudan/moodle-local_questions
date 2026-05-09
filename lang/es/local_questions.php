@@ -80,6 +80,18 @@ $string['formatxml'] = 'XML de Moodle';
 $string['questionsexported'] = '{$a} preguntas exportadas.';
 $string['noquestionstoexport'] = 'No hay preguntas para exportar en la categoría seleccionada.';
 
+// Exportación PDF asíncrona (tarea ad-hoc).
+$string['pdf_async_threshold'] = 'Umbral PDF asíncrono';
+$string['pdf_async_threshold_desc'] = 'Cuando una exportación PDF supere este número de preguntas, la generación se enviará a una tarea ad-hoc en lugar de ejecutarse dentro de la petición web. El PDF resultante se almacenará en los archivos privados del usuario y se le notificará cuando esté listo. Pon 0 para exportar siempre de forma síncrona.';
+$string['exportpdf_queued'] = 'Tu exportación PDF de {$a->count} preguntas se ha encolado. Recibirás una notificación con el enlace de descarga cuando esté lista.';
+$string['exportpdf_ready_subject'] = 'Exportación PDF de preguntas lista: {$a->category}';
+$string['exportpdf_ready_body'] = 'Tu exportación PDF de la categoría "{$a->category}" está lista ({$a->filename}, {$a->size}). Puedes descargarla desde tu zona de archivos privados.';
+$string['exportpdf_ready_small'] = 'Tu exportación PDF "{$a->category}" está lista.';
+$string['exportpdf_ready_link'] = 'Abrir archivos privados';
+$string['exportpdf_failed_subject'] = 'Exportación PDF de preguntas fallida: {$a->category}';
+$string['exportpdf_failed_body'] = 'No se pudo generar tu exportación PDF de la categoría "{$a->category}": {$a->reason}';
+$string['exportpdf_failed_small'] = 'Tu exportación PDF "{$a->category}" ha fallado.';
+
 // Errors
 $string['invalidfield'] = 'Campo inválido especificado para actualización.';
 $string['nocategory'] = 'Por favor seleccione una categoría.';

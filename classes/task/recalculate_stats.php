@@ -31,10 +31,6 @@ class recalculate_stats extends \core\task\scheduled_task {
     public function execute() {
         global $DB;
 
-        // Invalidate cache to force fresh data.
-        $cache = \cache::make('local_questions', 'statistics');
-        $cache->purge();
-
         // Get question counts per category.
         $sql = "SELECT qc.id as categoryid, qc.contextid, COUNT(q.id) as questioncount
                 FROM {question_categories} qc
@@ -42,15 +38,15 @@ class recalculate_stats extends \core\task\scheduled_task {
                 LEFT JOIN {question_versions} qv ON qv.questionbankentryid = qbe.id
                 LEFT JOIN {question} q ON q.id = qv.questionid
                 GROUP BY qc.id, qc.contextid";
-        
+
         $stats = $DB->get_records_sql($sql);
-        
+
         foreach ($stats as $stat) {
             $record = new \stdClass();
             $record->categoryid = $stat->categoryid;
             $record->questioncount = $stat->questioncount;
             $record->timemodified = time();
-            
+
             // Check if record exists.
             $existing = $DB->get_record('local_questions_stats', ['categoryid' => $stat->categoryid]);
             if ($existing) {
@@ -61,6 +57,12 @@ class recalculate_stats extends \core\task\scheduled_task {
                 $DB->insert_record('local_questions_stats', $record);
             }
         }
+
+        // Purge cache AFTER updating the precomputed table so the next reader
+        // rehydrates from fresh data (build_category_options falls back to
+        // local_questions_stats on cold cache).
+        $cache = \cache::make('local_questions', 'statistics');
+        $cache->purge();
 
         mtrace('local_questions: Statistics recalculated for ' . count($stats) . ' categories.');
     }

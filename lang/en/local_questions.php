@@ -80,6 +80,18 @@ $string['formatxml'] = 'Moodle XML';
 $string['questionsexported'] = '{$a} questions exported.';
 $string['noquestionstoexport'] = 'No questions to export in the selected category.';
 
+// Asynchronous PDF export (ad-hoc task).
+$string['pdf_async_threshold'] = 'Asynchronous PDF threshold';
+$string['pdf_async_threshold_desc'] = 'When a PDF export targets more questions than this number, generation is dispatched to an ad-hoc task instead of running inside the web request. The resulting PDF is stored in the user\'s private files area and the user is notified when it is ready. Set to 0 to always export synchronously.';
+$string['exportpdf_queued'] = 'Your PDF export of {$a->count} questions has been queued. You will receive a notification with the download link when it is ready.';
+$string['exportpdf_ready_subject'] = 'Question PDF export ready: {$a->category}';
+$string['exportpdf_ready_body'] = 'Your PDF export for category "{$a->category}" is ready ({$a->filename}, {$a->size}). You can download it from your private files area.';
+$string['exportpdf_ready_small'] = 'Your PDF export "{$a->category}" is ready.';
+$string['exportpdf_ready_link'] = 'Open private files';
+$string['exportpdf_failed_subject'] = 'Question PDF export failed: {$a->category}';
+$string['exportpdf_failed_body'] = 'Your PDF export for category "{$a->category}" could not be generated: {$a->reason}';
+$string['exportpdf_failed_small'] = 'Your PDF export "{$a->category}" failed.';
+
 // Errors
 $string['invalidfield'] = 'Invalid field specified for update.';
 $string['nocategory'] = 'Please select a category.';

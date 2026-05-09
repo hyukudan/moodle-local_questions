@@ -20,6 +20,47 @@ class question_io {
     const SUPPORTED_QTYPES = ['multichoice', 'truefalse', 'shortanswer', 'essay', 'match', 'numerical'];
 
     /**
+     * Count the questions that an export call would return.
+     *
+     * Cheap pre-check used by the export.php controller to decide whether to
+     * generate the PDF synchronously or hand it off to an ad-hoc task.
+     * Mirrors the WHERE clause of {@see export_to_pdf()} / {@see export_to_csv()}.
+     *
+     * @param int   $categoryid The category ID to export from.
+     * @param bool  $recurse    Whether to include subcategories.
+     * @param array $filters    Optional filters (qtype, etc).
+     * @return int  Number of questions matching the export criteria.
+     */
+    public static function count_for_export(int $categoryid, bool $recurse = false, array $filters = []): int {
+        global $DB;
+
+        $catids = [$categoryid];
+        if ($recurse) {
+            $catids = array_merge($catids, self::get_subcategory_ids($categoryid));
+        }
+
+        list($insql, $inparams) = $DB->get_in_or_equal($catids);
+
+        $sql = "SELECT COUNT(DISTINCT q.id)
+                  FROM {question} q
+                  JOIN {question_versions} qv ON qv.questionid = q.id
+                  JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid
+                 WHERE qbe.questioncategoryid $insql
+                   AND qv.version = (
+                       SELECT MAX(qv2.version)
+                         FROM {question_versions} qv2
+                        WHERE qv2.questionbankentryid = qv.questionbankentryid
+                   )";
+
+        if (!empty($filters['qtype'])) {
+            $sql .= " AND q.qtype = ?";
+            $inparams[] = $filters['qtype'];
+        }
+
+        return (int)$DB->count_records_sql($sql, $inparams);
+    }
+
+    /**
      * Export questions from a category to CSV format.
      *
      * @param int $categoryid The category ID to export from.

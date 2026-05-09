@@ -471,22 +471,49 @@ class renderer extends plugin_renderer_base {
     private function build_category_options(int $selectedid = 0, bool $includeall = false): array {
         global $DB;
 
-        // Fetch all categories.
-        $categories = $DB->get_records('question_categories', null, 'parent ASC, sortorder ASC, name ASC', 'id, name, parent');
+        // Fetch all categories (cheap, indexed lookup; cached per request below
+        // because the dashboard calls this from multiple renderers).
+        $categories = $DB->get_records('question_categories', null,
+            'parent ASC, sortorder ASC, name ASC', 'id, name, parent');
 
-        // Fetch question counts per category in a single query.
-        $countssql = "SELECT qbe.questioncategoryid, COUNT(DISTINCT q.id) as questioncount
-                        FROM {question} q
-                        JOIN {question_versions} qv ON qv.questionid = q.id
-                        JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid
-                       WHERE qv.status = 'ready'
-                         AND qv.version = (
-                             SELECT MAX(qv2.version)
-                               FROM {question_versions} qv2
-                              WHERE qv2.questionbankentryid = qv.questionbankentryid
-                         )
-                    GROUP BY qbe.questioncategoryid";
-        $counts = $DB->get_records_sql_menu($countssql);
+        // Per-category question counts — the heavy query. We prefer:
+        //   1. MUC ('local_questions/statistics' definition) — refreshed by
+        //      the recalculate_stats scheduled task, TTL 5 min.
+        //   2. The precomputed local_questions_stats table written by the
+        //      same task (fallback when the cache entry is missing).
+        //   3. The full SQL aggregation (only on cold cache + missing table).
+        $cache = \cache::make('local_questions', 'statistics');
+        $counts = $cache->get('category_counts');
+
+        if ($counts === false) {
+            // Try the precomputed table first; the scheduled task keeps it
+            // fresh every 6h. This avoids the expensive correlated subquery
+            // on every dashboard hit.
+            $counts = $DB->get_records_menu('local_questions_stats', null, '',
+                'categoryid, questioncount');
+
+            if (empty($counts)) {
+                // Cold install / table not yet populated: fall back to the
+                // live aggregation (one-off cost, then cached).
+                $countssql = "SELECT qbe.questioncategoryid,
+                                     COUNT(DISTINCT q.id) AS questioncount
+                                FROM {question} q
+                                JOIN {question_versions} qv
+                                  ON qv.questionid = q.id
+                                JOIN {question_bank_entries} qbe
+                                  ON qbe.id = qv.questionbankentryid
+                               WHERE qv.status = 'ready'
+                                 AND qv.version = (
+                                     SELECT MAX(qv2.version)
+                                       FROM {question_versions} qv2
+                                      WHERE qv2.questionbankentryid = qv.questionbankentryid
+                                 )
+                            GROUP BY qbe.questioncategoryid";
+                $counts = $DB->get_records_sql_menu($countssql);
+            }
+
+            $cache->set('category_counts', $counts);
+        }
 
         // Build tree structure.
         $tree = [];
