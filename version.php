@@ -10,7 +10,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'local_questions';
-$plugin->version   = 2026010705;  // Async PDF export ad-hoc task + MUC-cached category counts.
+$plugin->version   = 2026010706;  // Path-traversal hardening on CSV import helpers
 $plugin->requires  = 2024042200;  // Moodle 4.4+ (Bootstrap 5 required).
 $plugin->maturity  = MATURITY_BETA;
 $plugin->release   = '0.5.0';

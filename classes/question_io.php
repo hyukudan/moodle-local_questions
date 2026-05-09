@@ -396,10 +396,16 @@ class question_io {
             'errors' => []
         ];
 
-        if (!file_exists($filepath)) {
+        // Defense in depth: even though all current callers pass a path that
+        // PHP/Moodle generated (never user-controlled), this is a public static
+        // method — a future caller could pass user input. Resolve and ensure
+        // the file is inside an allowed temp directory.
+        $safepath = self::resolve_safe_temp_path($filepath);
+        if ($safepath === null) {
             $result['errors'][] = 'File not found.';
             return $result;
         }
+        $filepath = $safepath;
 
         $handle = fopen($filepath, 'r');
         if (!$handle) {
@@ -505,9 +511,12 @@ class question_io {
     public static function preview_csv(string $filepath): array {
         $preview = [];
 
-        if (!file_exists($filepath)) {
+        // Defense in depth — see import_from_csv() for rationale.
+        $safepath = self::resolve_safe_temp_path($filepath);
+        if ($safepath === null) {
             return $preview;
         }
+        $filepath = $safepath;
 
         $handle = fopen($filepath, 'r');
         if (!$handle) {
@@ -593,12 +602,55 @@ class question_io {
 
         $ids = [];
         $children = $DB->get_records('question_categories', ['parent' => $parentid], '', 'id');
-        
+
         foreach ($children as $child) {
             $ids[] = $child->id;
             $ids = array_merge($ids, self::get_subcategory_ids($child->id));
         }
 
         return $ids;
+    }
+
+    /**
+     * Resolve a path and verify it lives inside an allowed temp directory.
+     *
+     * Rejects path traversal attempts (../) by relying on realpath() canonicalisation
+     * and a whitelist of known temp roots: Moodle's tempdir, dataroot/temp, the system
+     * temp dir, and PHP's upload_tmp_dir. Returns the canonical path on success or
+     * null if the file is missing or outside the whitelist.
+     *
+     * @param string $filepath Raw filepath supplied by a caller.
+     * @return string|null Canonical safe path, or null if invalid/outside whitelist.
+     */
+    private static function resolve_safe_temp_path(string $filepath): ?string {
+        global $CFG;
+
+        $real = realpath($filepath);
+        if ($real === false || !is_file($real)) {
+            return null;
+        }
+
+        $candidates = [
+            $CFG->tempdir ?? '',
+            ($CFG->dataroot ?? '') . '/temp',
+            sys_get_temp_dir(),
+            ini_get('upload_tmp_dir') ?: '',
+        ];
+
+        foreach ($candidates as $root) {
+            if ($root === '') {
+                continue;
+            }
+            $rootreal = realpath($root);
+            if ($rootreal === false) {
+                continue;
+            }
+            // Match the directory itself OR anything strictly under it.
+            if ($real === $rootreal || str_starts_with($real, $rootreal . DIRECTORY_SEPARATOR)) {
+                return $real;
+            }
+        }
+
+        return null;
     }
 }
