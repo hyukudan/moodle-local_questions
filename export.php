@@ -108,7 +108,11 @@ if ($action === 'export' && confirm_sesskey()) {
     }
 
     header('Content-Disposition: attachment; filename="' . $filename . '"');
-    header('Content-Length: ' . strlen($result['data']));
+    // Use 8bit-safe length for binary PDF/CSV payloads — strlen() can be
+    // overridden by the legacy mbstring.func_overload directive on some PHP
+    // builds and report character count instead of bytes, which would
+    // truncate the download client-side.
+    header('Content-Length: ' . mb_strlen($result['data'], '8bit'));
     header('Cache-Control: no-cache, no-store, must-revalidate');
 
     echo $result['data'];

@@ -10,7 +10,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'local_questions';
-$plugin->version   = 2026010706;  // Path-traversal hardening on CSV import helpers
+$plugin->version   = 2026010707;  // 8bit Content-Length + MUC stats TTL bumped 5min->1h
 $plugin->requires  = 2024042200;  // Moodle 4.4+ (Bootstrap 5 required).
 $plugin->maturity  = MATURITY_BETA;
-$plugin->release   = '0.5.0';
+$plugin->release   = '0.5.1';
