@@ -35,14 +35,21 @@ if ($action === 'export' && confirm_sesskey()) {
     $format = optional_param('format', 'csv', PARAM_ALPHA);
     $qtype = optional_param('qtype', '', PARAM_ALPHANUMEXT);
 
+    if ($categoryid > 0) {
+        $category = $DB->get_record('question_categories', ['id' => $categoryid], 'id, name, contextid', MUST_EXIST);
+        $catcontext = \context::instance_by_id($category->contextid);
+        require_capability('moodle/question:viewall', $catcontext);
+    } else {
+        require_capability('moodle/question:viewall', context_system::instance());
+    }
+
     $filters = [];
     if (!empty($qtype)) {
         $filters['qtype'] = $qtype;
     }
 
     // Get category name for filename / async notifications.
-    $category = $DB->get_record('question_categories', ['id' => $categoryid], 'name');
-    $catname = $category ? $category->name : $categoryid;
+    $catname = $categoryid > 0 ? $category->name : get_string('allcategories', 'local_questions');
 
     // For PDF exports we may need to dispatch to an ad-hoc task: TCPDF is
     // memory-hungry and large categories can blow the request limits even with

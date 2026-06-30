@@ -45,6 +45,35 @@ class provider implements
             'privacy:metadata:local_questions_flags'
         );
 
+        $collection->add_database_table(
+            'local_questions_flag_status',
+            [
+                'resolvedby' => 'privacy:metadata:local_questions_flag_status:resolvedby',
+                'resolutionfeedback' => 'privacy:metadata:local_questions_flag_status:resolutionfeedback',
+            ],
+            'privacy:metadata:local_questions_flag_status'
+        );
+
+        $collection->add_database_table(
+            'local_questions_log',
+            [
+                'userid' => 'privacy:metadata:local_questions_log:userid',
+                'action' => 'privacy:metadata:local_questions_log:action',
+                'questionid' => 'privacy:metadata:local_questions_log:questionid',
+            ],
+            'privacy:metadata:local_questions_log'
+        );
+
+        $collection->add_external_location_link(
+            'google_gemini',
+            [
+                'questiontext' => 'privacy:metadata:google_gemini:questiontext',
+                'answers' => 'privacy:metadata:google_gemini:answers',
+                'feedback' => 'privacy:metadata:google_gemini:feedback',
+            ],
+            'privacy:metadata:google_gemini'
+        );
+
         return $collection;
     }
 
@@ -57,15 +86,29 @@ class provider implements
     public static function get_contexts_for_userid(int $userid): contextlist {
         $contextlist = new contextlist();
 
-        // Flags are stored at system context level.
+        // Plugin data is stored at system context level.
         $sql = "SELECT ctx.id
                   FROM {context} ctx
-                  JOIN {local_questions_flags} lqf ON ctx.contextlevel = :contextlevel
-                 WHERE lqf.userid = :userid";
+                  JOIN {local_questions_flags} lqf ON ctx.contextlevel = :contextlevel1
+                 WHERE lqf.userid = :userid1
+                 UNION
+                SELECT ctx.id
+                  FROM {context} ctx
+                  JOIN {local_questions_flag_status} lqfs ON ctx.contextlevel = :contextlevel2
+                 WHERE lqfs.resolvedby = :userid2
+                 UNION
+                SELECT ctx.id
+                  FROM {context} ctx
+                  JOIN {local_questions_log} lql ON ctx.contextlevel = :contextlevel3
+                 WHERE lql.userid = :userid3";
 
         $params = [
-            'contextlevel' => CONTEXT_SYSTEM,
-            'userid' => $userid,
+            'contextlevel1' => CONTEXT_SYSTEM,
+            'userid1' => $userid,
+            'contextlevel2' => CONTEXT_SYSTEM,
+            'userid2' => $userid,
+            'contextlevel3' => CONTEXT_SYSTEM,
+            'userid3' => $userid,
         ];
 
         $contextlist->add_from_sql($sql, $params);
@@ -87,6 +130,14 @@ class provider implements
 
         $sql = "SELECT DISTINCT userid FROM {local_questions_flags}";
         $userlist->add_from_sql('userid', $sql, []);
+
+        $sql = "SELECT DISTINCT resolvedby
+                  FROM {local_questions_flag_status}
+                 WHERE resolvedby IS NOT NULL";
+        $userlist->add_from_sql('resolvedby', $sql, []);
+
+        $sql = "SELECT DISTINCT userid FROM {local_questions_log}";
+        $userlist->add_from_sql('userid', $sql, []);
     }
 
     /**
@@ -107,10 +158,6 @@ class provider implements
             // Get all flags by this user.
             $flags = $DB->get_records('local_questions_flags', ['userid' => $userid]);
 
-            if (empty($flags)) {
-                continue;
-            }
-
             $flagdata = [];
             foreach ($flags as $flag) {
                 // Get question name for context.
@@ -125,10 +172,51 @@ class provider implements
                 ];
             }
 
-            writer::with_context($context)->export_data(
-                [get_string('pluginname', 'local_questions'), get_string('flags', 'local_questions')],
-                (object)['flags' => $flagdata]
-            );
+            if (!empty($flagdata)) {
+                writer::with_context($context)->export_data(
+                    [get_string('pluginname', 'local_questions'), get_string('flags', 'local_questions')],
+                    (object)['flags' => $flagdata]
+                );
+            }
+
+            $statuses = $DB->get_records('local_questions_flag_status', ['resolvedby' => $userid]);
+            $statusdata = [];
+            foreach ($statuses as $status) {
+                $statusdata[] = [
+                    'questionid' => $status->questionid,
+                    'status' => $status->status,
+                    'resolution' => $status->resolution,
+                    'resolutionfeedback' => $status->resolutionfeedback,
+                    'timeresolved' => !empty($status->timeresolved)
+                        ? \core_privacy\local\request\transform::datetime($status->timeresolved) : null,
+                ];
+            }
+
+            if (!empty($statusdata)) {
+                writer::with_context($context)->export_data(
+                    [get_string('pluginname', 'local_questions'),
+                        get_string('privacy:metadata:local_questions_flag_status', 'local_questions')],
+                    (object)['flag_status' => $statusdata]
+                );
+            }
+
+            $logs = $DB->get_records('local_questions_log', ['userid' => $userid]);
+            $logdata = [];
+            foreach ($logs as $log) {
+                $logdata[] = [
+                    'questionid' => $log->questionid,
+                    'action' => $log->action,
+                    'timecreated' => \core_privacy\local\request\transform::datetime($log->timecreated),
+                ];
+            }
+
+            if (!empty($logdata)) {
+                writer::with_context($context)->export_data(
+                    [get_string('pluginname', 'local_questions'),
+                        get_string('privacy:metadata:local_questions_log', 'local_questions')],
+                    (object)['log' => $logdata]
+                );
+            }
         }
     }
 
@@ -146,9 +234,13 @@ class provider implements
 
         // Delete all flags and recalculate status counts.
         $DB->delete_records('local_questions_flags');
+        $DB->delete_records('local_questions_log');
 
-        // Reset all flag status records to zero.
-        $DB->execute("UPDATE {local_questions_flag_status} SET flagcount = 0");
+        // Reset all flag status records to zero and anonymise resolver data.
+        $DB->execute("UPDATE {local_questions_flag_status}
+                         SET flagcount = 0,
+                             resolvedby = NULL,
+                             resolutionfeedback = NULL");
     }
 
     /**
@@ -176,6 +268,11 @@ class provider implements
 
             // Delete user's flags.
             $DB->delete_records('local_questions_flags', ['userid' => $userid]);
+            $DB->delete_records('local_questions_log', ['userid' => $userid]);
+            $DB->execute("UPDATE {local_questions_flag_status}
+                             SET resolvedby = NULL,
+                                 resolutionfeedback = NULL
+                           WHERE resolvedby = ?", [$userid]);
 
             // Update flag counts for affected questions.
             foreach ($questionids as $questionid) {
@@ -216,6 +313,11 @@ class provider implements
 
         // Delete flags for all specified users.
         $DB->delete_records_select('local_questions_flags', "userid $insql", $inparams);
+        $DB->delete_records_select('local_questions_log', "userid $insql", $inparams);
+        $DB->execute("UPDATE {local_questions_flag_status}
+                         SET resolvedby = NULL,
+                             resolutionfeedback = NULL
+                       WHERE resolvedby $insql", $inparams);
 
         // Update flag counts for affected questions.
         foreach ($questionids as $questionid) {

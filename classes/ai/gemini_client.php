@@ -96,7 +96,9 @@ class gemini_client {
             'CURLOPT_HTTPHEADER' => [
                 'Content-Type: application/json',
                 'x-goog-api-key: ' . $apikey
-            ]
+            ],
+            'CURLOPT_TIMEOUT' => 60,
+            'CURLOPT_CONNECTTIMEOUT' => 10,
         ];
 
         $response = $curl->post($url, json_encode($payload), $options);
@@ -106,6 +108,10 @@ class gemini_client {
         }
 
         $data = json_decode($response, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new \moodle_exception('gemini_api_error', 'local_questions', '',
+                'Invalid JSON response from Gemini API.');
+        }
         
         if (isset($data['error'])) {
             throw new \moodle_exception('gemini_api_error', 'local_questions', '', $data['error']['message']);
@@ -116,7 +122,12 @@ class gemini_client {
             $text = $data['candidates'][0]['content']['parts'][0]['text'];
             // Clean markdown code blocks if present.
             $text = str_replace(['```json', '```'], '', $text);
-            return json_decode($text, true) ?: [];
+            $candidate = json_decode($text, true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                throw new \moodle_exception('gemini_api_error', 'local_questions', '',
+                    'Invalid JSON response from Gemini API.');
+            }
+            return $candidate ?: [];
         }
 
         return [];

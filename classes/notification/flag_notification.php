@@ -124,13 +124,10 @@ class flag_notification {
     private static function format_html_message(string $text, \stdClass $a): string {
         $html = nl2br(s($text));
 
-        // Add a styled container.
+        // Add a styled container. The question is referenced once inside the body text itself
+        // (the "Pregunta:"/"Question:" line of each lang string), so we don't repeat it here
+        // as a heading/quote to avoid showing the (often long) stem several times.
         $output = '<div style="font-family: Arial, sans-serif; padding: 15px; background: #f5f5f5; border-radius: 5px;">';
-        $output .= '<h3 style="color: #333; margin-top: 0;">' . s($a->questionname) . '</h3>';
-        if (!empty($a->questionpreview)) {
-            $output .= '<p style="color: #666; font-style: italic; border-left: 3px solid #ccc; padding-left: 10px; margin: 10px 0;">'
-                     . s($a->questionpreview) . '</p>';
-        }
         $output .= '<p>' . $html . '</p>';
         $output .= '</div>';
 

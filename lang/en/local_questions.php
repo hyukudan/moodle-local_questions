@@ -21,6 +21,17 @@ $string['privacy:metadata:local_questions_flags:questionid'] = 'The ID of the re
 $string['privacy:metadata:local_questions_flags:reason'] = 'The reason selected for the report.';
 $string['privacy:metadata:local_questions_flags:comment'] = 'The optional comment provided by the user.';
 $string['privacy:metadata:local_questions_flags:timecreated'] = 'The time when the report was submitted.';
+$string['privacy:metadata:local_questions_flag_status'] = 'Stores aggregated question report status and resolution data.';
+$string['privacy:metadata:local_questions_flag_status:resolvedby'] = 'The ID of the user who resolved the report.';
+$string['privacy:metadata:local_questions_flag_status:resolutionfeedback'] = 'The feedback provided when resolving the report.';
+$string['privacy:metadata:local_questions_log'] = 'Stores audit log entries for question management actions.';
+$string['privacy:metadata:local_questions_log:userid'] = 'The ID of the user who performed the action.';
+$string['privacy:metadata:local_questions_log:action'] = 'The action performed by the user.';
+$string['privacy:metadata:local_questions_log:questionid'] = 'The ID of the question affected by the action.';
+$string['privacy:metadata:google_gemini'] = 'Question content is sent to Google Gemini when AI analysis is used.';
+$string['privacy:metadata:google_gemini:questiontext'] = 'The text of questions sent for AI analysis.';
+$string['privacy:metadata:google_gemini:answers'] = 'The answer text sent for AI analysis.';
+$string['privacy:metadata:google_gemini:feedback'] = 'Question and answer feedback sent for AI analysis.';
 $string['features_enabled'] = 'Features enabled!';
 $string['questions:manage'] = 'Manage questions administration';
 $string['questions:export'] = 'Export questions statistics';
@@ -72,6 +83,8 @@ $string['questionsimported'] = '{$a} questions imported successfully.';
 $string['questionsskipped'] = '{$a} questions skipped due to errors.';
 $string['novalidquestions'] = 'No valid questions found in the file.';
 $string['invalidcsvformat'] = 'Invalid CSV format. Please check the file structure.';
+$string['invalidcsvfiletype'] = 'Invalid file type. Please upload a CSV file.';
+$string['csvfiletoolarge'] = 'The CSV file is too large. The maximum size is {$a}.';
 $string['csvhelp'] = 'CSV must have columns: name, questiontext, qtype, answers (pipe-separated), feedback (pipe-separated), fractions (pipe-separated).';
 $string['includesubcategories'] = 'Include subcategories';
 $string['exportformat'] = 'Export Format';
@@ -114,6 +127,7 @@ $string['gemini_model'] = 'Model';
 $string['gemini_model_desc'] = 'Select the Gemini model to use.';
 $string['gemini_prompt'] = 'System Prompt';
 $string['gemini_prompt_desc'] = 'Custom instructions for the AI auditor.';
+$string['gemini_api_error'] = 'Gemini API error: {$a}';
 
 // Question Flagging System
 $string['flags'] = 'Reports';
@@ -196,7 +210,7 @@ $string['flagdismissed'] = 'The report has been dismissed.';
 
 // Notifications
 $string['notification_resolved_subject'] = 'Your report on question "{$a->questionname}" has been resolved';
-$string['notification_resolved_full'] = 'Your report on the question "{$a->questionname}" has been reviewed and resolved.
+$string['notification_resolved_full'] = 'Your report has been reviewed and resolved.
 
 Question: {$a->questionpreview}
 
@@ -207,7 +221,7 @@ Teacher feedback:
 $string['notification_resolved_small'] = 'Your report has been resolved';
 
 $string['notification_dismissed_subject'] = 'Your report on question "{$a->questionname}" has been reviewed';
-$string['notification_dismissed_full'] = 'Your report on the question "{$a->questionname}" has been reviewed.
+$string['notification_dismissed_full'] = 'Your report has been reviewed.
 
 Question: {$a->questionpreview}
 
@@ -268,5 +282,3 @@ $string['sort_modified_asc'] = 'Oldest first';
 // PDF Export
 $string['formatpdf'] = 'PDF Document';
 $string['downloadpdf'] = 'Download PDF';
-
-

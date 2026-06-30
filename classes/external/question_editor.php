@@ -4,6 +4,7 @@ namespace local_questions\external;
 defined('MOODLE_INTERNAL') || die();
 
 require_once("$CFG->libdir/externallib.php");
+require_once($CFG->libdir . '/questionlib.php');
 
 use external_api;
 use external_function_parameters;
@@ -33,6 +34,22 @@ class question_editor extends external_api {
         $context = context_system::instance();
         self::validate_context($context);
         require_capability('local/questions:manage', $context);
+
+        // Also require Moodle question edit permission in the question category context when resolvable.
+        $catsql = "SELECT qc.contextid
+                     FROM {question_versions} qv
+                     JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid
+                     JOIN {question_categories} qc ON qc.id = qbe.questioncategoryid
+                    WHERE qv.questionid = :questionid
+                 ORDER BY qv.version DESC";
+        $catrecords = $DB->get_records_sql($catsql, ['questionid' => $params['questionid']], 0, 1);
+        $catrecord = reset($catrecords);
+        if ($catrecord) {
+            $catcontext = \context::instance_by_id($catrecord->contextid, IGNORE_MISSING);
+            if ($catcontext) {
+                require_capability('moodle/question:editall', $catcontext);
+            }
+        }
 
         // Parse field.
         if ($params['field'] === 'questiontext' || $params['field'] === 'generalfeedback') {
@@ -112,6 +129,8 @@ class question_editor extends external_api {
         } else {
              throw new \moodle_exception('invalidfield', 'local_questions');
         }
+
+        \question_bank::notify_question_edited($params['questionid']);
 
         return ['success' => true];
     }

@@ -21,6 +21,17 @@ $string['privacy:metadata:local_questions_flags:questionid'] = 'El ID de la preg
 $string['privacy:metadata:local_questions_flags:reason'] = 'El motivo seleccionado para el reporte.';
 $string['privacy:metadata:local_questions_flags:comment'] = 'El comentario opcional proporcionado por el usuario.';
 $string['privacy:metadata:local_questions_flags:timecreated'] = 'La fecha y hora en que se envió el reporte.';
+$string['privacy:metadata:local_questions_flag_status'] = 'Almacena el estado agregado y los datos de resolución de los reportes de preguntas.';
+$string['privacy:metadata:local_questions_flag_status:resolvedby'] = 'El ID del usuario que resolvió el reporte.';
+$string['privacy:metadata:local_questions_flag_status:resolutionfeedback'] = 'El feedback proporcionado al resolver el reporte.';
+$string['privacy:metadata:local_questions_log'] = 'Almacena entradas de auditoría de acciones de gestión de preguntas.';
+$string['privacy:metadata:local_questions_log:userid'] = 'El ID del usuario que realizó la acción.';
+$string['privacy:metadata:local_questions_log:action'] = 'La acción realizada por el usuario.';
+$string['privacy:metadata:local_questions_log:questionid'] = 'El ID de la pregunta afectada por la acción.';
+$string['privacy:metadata:google_gemini'] = 'El contenido de las preguntas se envía a Google Gemini cuando se usa el análisis IA.';
+$string['privacy:metadata:google_gemini:questiontext'] = 'El texto de las preguntas enviado para análisis IA.';
+$string['privacy:metadata:google_gemini:answers'] = 'El texto de las respuestas enviado para análisis IA.';
+$string['privacy:metadata:google_gemini:feedback'] = 'El feedback de preguntas y respuestas enviado para análisis IA.';
 $string['features_enabled'] = '¡Funcionalidades habilitadas!';
 $string['questions:manage'] = 'Gestionar administración de preguntas';
 $string['questions:export'] = 'Exportar estadísticas de preguntas';
@@ -72,6 +83,8 @@ $string['questionsimported'] = '{$a} preguntas importadas exitosamente.';
 $string['questionsskipped'] = '{$a} preguntas omitidas debido a errores.';
 $string['novalidquestions'] = 'No se encontraron preguntas válidas en el archivo.';
 $string['invalidcsvformat'] = 'Formato CSV inválido. Por favor revise la estructura del archivo.';
+$string['invalidcsvfiletype'] = 'Tipo de archivo inválido. Por favor suba un archivo CSV.';
+$string['csvfiletoolarge'] = 'El archivo CSV es demasiado grande. El tamaño máximo es {$a}.';
 $string['csvhelp'] = 'El CSV debe tener columnas: name, questiontext, qtype, answers (separadas por |), feedback (separadas por |), fractions (separadas por |).';
 $string['includesubcategories'] = 'Incluir subcategorías';
 $string['exportformat'] = 'Formato de Exportación';
@@ -114,6 +127,7 @@ $string['gemini_model'] = 'Modelo';
 $string['gemini_model_desc'] = 'Selecciona el modelo Gemini a usar.';
 $string['gemini_prompt'] = 'Prompt del Sistema';
 $string['gemini_prompt_desc'] = 'Instrucciones personalizadas para el auditor AI.';
+$string['gemini_api_error'] = 'Error de API de Gemini: {$a}';
 
 // Question Flagging System
 $string['flags'] = 'Reportes';
@@ -196,23 +210,27 @@ $string['flagdismissed'] = 'El reporte ha sido descartado.';
 
 // Notifications
 $string['notification_resolved_subject'] = 'Tu reporte sobre la pregunta "{$a->questionname}" ha sido resuelto';
-$string['notification_resolved_full'] = 'Tu reporte sobre la pregunta "{$a->questionname}" ha sido revisado y resuelto.
+$string['notification_resolved_full'] = '¡Gracias por avisarnos! 🙌 Hemos revisado tu reporte y ya está resuelto.
 
 Pregunta: {$a->questionpreview}
 
-Resolución: {$a->resolution}
+Qué hemos corregido: {$a->resolution}
 
-Feedback del profesor:
-{$a->feedback}';
+Nota del equipo docente:
+{$a->feedback}
+
+Avisos como el tuyo nos ayudan a mejorar el temario para todos. ¡Sigue así!';
 $string['notification_resolved_small'] = 'Tu reporte ha sido resuelto';
 
 $string['notification_dismissed_subject'] = 'Tu reporte sobre la pregunta "{$a->questionname}" ha sido revisado';
-$string['notification_dismissed_full'] = 'Tu reporte sobre la pregunta "{$a->questionname}" ha sido revisado.
+$string['notification_dismissed_full'] = '¡Gracias por tu reporte! 🙌 La hemos revisado a fondo y, tras comprobarla, la pregunta es correcta tal y como está.
 
 Pregunta: {$a->questionpreview}
 
-Respuesta del profesor:
-{$a->feedback}';
+Aclaración del equipo docente:
+{$a->feedback}
+
+Dudar y cuestionar es parte de aprender: cada revisión nos ayuda a tener un banco más fiable. ¡A por la siguiente!';
 $string['notification_dismissed_small'] = 'Tu reporte ha sido revisado';
 
 $string['notification_newflag_subject'] = 'Nueva pregunta reportada: {$a->questionname}';
@@ -268,5 +286,3 @@ $string['sort_modified_asc'] = 'Antiguos primero';
 // PDF Export
 $string['formatpdf'] = 'Documento PDF';
 $string['downloadpdf'] = 'Descargar PDF';
-
-

@@ -116,6 +116,14 @@ class flag_manager {
             throw new \moodle_exception('questionnotfound', 'local_questions');
         }
 
+        // Do not trust a client-supplied attempt id unless it belongs to the reporting user.
+        if ($attemptid !== null) {
+            $attempt = $DB->get_record('quiz_attempts', ['id' => $attemptid], 'id, userid');
+            if (!$attempt || (int)$attempt->userid !== $userid) {
+                $attemptid = null;
+            }
+        }
+
         // Create flag record.
         $flag = new \stdClass();
         $flag->questionid = $questionid;

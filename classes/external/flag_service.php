@@ -124,6 +124,7 @@ class flag_service extends external_api {
 
         $context = context_system::instance();
         self::validate_context($context);
+        require_capability('local/questions:flag', $context);
 
         $hasflagged = flag_manager::has_user_flagged($params['questionid'], $USER->id);
         $status = flag_manager::get_flag_status($params['questionid']);

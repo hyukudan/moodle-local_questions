@@ -50,7 +50,7 @@ class export_pdf_task extends \core\task\adhoc_task {
         $filters = isset($data->filters) ? (array)$data->filters : [];
         $categoryname = (string)($data->categoryname ?? '');
 
-        if ($categoryid <= 0) {
+        if ($categoryid < 0) {
             mtrace('local_questions export_pdf_task: missing categoryid, aborting.');
             return;
         }

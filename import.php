@@ -34,13 +34,37 @@ $categoryid = optional_param('categoryid', 0, PARAM_INT);
 
 $preview = null;
 $results = null;
+$maxcsvbytes = 5 * 1024 * 1024;
 
 if ($action === 'preview' && confirm_sesskey()) {
     // Handle file upload for preview.
     $categoryid = required_param('categoryid', PARAM_INT);
+    $category = $DB->get_record('question_categories', ['id' => $categoryid], 'id, contextid', MUST_EXIST);
+    $catcontext = \context::instance_by_id($category->contextid);
+    require_capability('moodle/question:add', $catcontext);
     
     if (isset($_FILES['csvfile']) && $_FILES['csvfile']['error'] === UPLOAD_ERR_OK) {
         $tmpfile = $_FILES['csvfile']['tmp_name'];
+        $filename = clean_filename($_FILES['csvfile']['name']);
+        $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+
+        if ($_FILES['csvfile']['size'] > $maxcsvbytes) {
+            redirect(
+                new moodle_url('/local/questions/import.php'),
+                get_string('csvfiletoolarge', 'local_questions', display_size($maxcsvbytes)),
+                null,
+                \core\output\notification::NOTIFY_ERROR
+            );
+        }
+
+        if ($extension !== 'csv') {
+            redirect(
+                new moodle_url('/local/questions/import.php'),
+                get_string('invalidcsvfiletype', 'local_questions'),
+                null,
+                \core\output\notification::NOTIFY_ERROR
+            );
+        }
         
         // Save to draft area for later use.
         $draftitemid = file_get_unused_draft_itemid();
@@ -53,7 +77,7 @@ if ($action === 'preview' && confirm_sesskey()) {
             'filearea' => 'draft',
             'itemid' => $draftitemid,
             'filepath' => '/',
-            'filename' => $_FILES['csvfile']['name']
+            'filename' => $filename
         ];
         
         $storedfile = $fs->create_file_from_pathname($filerecord, $tmpfile);
@@ -79,6 +103,9 @@ if ($action === 'preview' && confirm_sesskey()) {
     // Process actual import.
     $categoryid = required_param('categoryid', PARAM_INT);
     $draftid = required_param('draftid', PARAM_INT);
+    $category = $DB->get_record('question_categories', ['id' => $categoryid], 'id, contextid', MUST_EXIST);
+    $catcontext = \context::instance_by_id($category->contextid);
+    require_capability('moodle/question:add', $catcontext);
     
     $usercontext = context_user::instance($USER->id);
     $fs = get_file_storage();
@@ -95,6 +122,27 @@ if ($action === 'preview' && confirm_sesskey()) {
     }
     
     $file = reset($files);
+    $filename = clean_filename($file->get_filename());
+    $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+
+    if ($file->get_filesize() > $maxcsvbytes) {
+        redirect(
+            new moodle_url('/local/questions/import.php'),
+            get_string('csvfiletoolarge', 'local_questions', display_size($maxcsvbytes)),
+            null,
+            \core\output\notification::NOTIFY_ERROR
+        );
+    }
+
+    if ($extension !== 'csv') {
+        redirect(
+            new moodle_url('/local/questions/import.php'),
+            get_string('invalidcsvfiletype', 'local_questions'),
+            null,
+            \core\output\notification::NOTIFY_ERROR
+        );
+    }
+
     $tmpfile = $file->copy_content_to_temp();
     
     $results = question_io::import_from_csv($tmpfile, $categoryid);

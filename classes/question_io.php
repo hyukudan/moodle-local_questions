@@ -34,18 +34,25 @@ class question_io {
     public static function count_for_export(int $categoryid, bool $recurse = false, array $filters = []): int {
         global $DB;
 
-        $catids = [$categoryid];
-        if ($recurse) {
-            $catids = array_merge($catids, self::get_subcategory_ids($categoryid));
-        }
+        self::require_category_capability($categoryid, 'moodle/question:viewall');
 
-        list($insql, $inparams) = $DB->get_in_or_equal($catids);
+        $categorywhere = '';
+        $inparams = [];
+        if ($categoryid > 0) {
+            $catids = [$categoryid];
+            if ($recurse) {
+                $catids = array_merge($catids, self::get_subcategory_ids($categoryid));
+            }
+            list($insql, $inparams) = $DB->get_in_or_equal($catids);
+            $categorywhere = "AND qbe.questioncategoryid $insql";
+        }
 
         $sql = "SELECT COUNT(DISTINCT q.id)
                   FROM {question} q
                   JOIN {question_versions} qv ON qv.questionid = q.id
                   JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid
-                 WHERE qbe.questioncategoryid $insql
+                 WHERE 1 = 1
+                   $categorywhere
                    AND qv.version = (
                        SELECT MAX(qv2.version)
                          FROM {question_versions} qv2
@@ -71,20 +78,28 @@ class question_io {
     public static function export_to_csv(int $categoryid, bool $recurse = false, array $filters = []): array {
         global $DB;
 
-        $catids = [$categoryid];
-        if ($recurse) {
-            $catids = array_merge($catids, self::get_subcategory_ids($categoryid));
-        }
+        self::require_category_capability($categoryid, 'moodle/question:viewall');
 
-        // Moodle 4.0+ uses question_bank_entries for category relationship.
-        // We need to join through question_versions to get questions by category.
-        list($insql, $inparams) = $DB->get_in_or_equal($catids);
+        $categorywhere = '';
+        $inparams = [];
+        if ($categoryid > 0) {
+            $catids = [$categoryid];
+            if ($recurse) {
+                $catids = array_merge($catids, self::get_subcategory_ids($categoryid));
+            }
+
+            // Moodle 4.0+ uses question_bank_entries for category relationship.
+            // We need to join through question_versions to get questions by category.
+            list($insql, $inparams) = $DB->get_in_or_equal($catids);
+            $categorywhere = "AND qbe.questioncategoryid $insql";
+        }
 
         $sql = "SELECT q.*
                   FROM {question} q
                   JOIN {question_versions} qv ON qv.questionid = q.id
                   JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid
-                 WHERE qbe.questioncategoryid $insql
+                 WHERE 1 = 1
+                   $categorywhere
                    AND qv.version = (
                        SELECT MAX(qv2.version)
                          FROM {question_versions} qv2
@@ -147,13 +162,13 @@ class question_io {
 
             fputcsv($output, [
                 $q->id,
-                $q->name,
-                strip_tags($q->questiontext),
+                self::csv_safe($q->name),
+                self::csv_safe(strip_tags($q->questiontext)),
                 $q->qtype,
-                implode('|', $answerTexts),
-                implode('|', $feedbackTexts),
+                self::csv_safe(implode('|', $answerTexts)),
+                self::csv_safe(implode('|', $feedbackTexts)),
                 implode('|', $fractions),
-                strip_tags($q->generalfeedback ?? ''),
+                self::csv_safe(strip_tags($q->generalfeedback ?? '')),
                 $q->defaultmark ?? 1
             ]);
         }
@@ -177,23 +192,30 @@ class question_io {
         global $CFG, $DB, $USER;
 
         require_once($CFG->libdir . '/pdflib.php');
+        self::require_category_capability($categoryid, 'moodle/question:viewall');
 
         // Raise limits for large exports - TCPDF is memory intensive.
         raise_memory_limit(MEMORY_EXTRA);
         \core_php_time_limit::raise(300);
 
-        $catids = [$categoryid];
-        if ($recurse) {
-            $catids = array_merge($catids, self::get_subcategory_ids($categoryid));
-        }
+        $categorywhere = '';
+        $inparams = [];
+        if ($categoryid > 0) {
+            $catids = [$categoryid];
+            if ($recurse) {
+                $catids = array_merge($catids, self::get_subcategory_ids($categoryid));
+            }
 
-        list($insql, $inparams) = $DB->get_in_or_equal($catids);
+            list($insql, $inparams) = $DB->get_in_or_equal($catids);
+            $categorywhere = "AND qbe.questioncategoryid $insql";
+        }
 
         $sql = "SELECT q.*
                   FROM {question} q
                   JOIN {question_versions} qv ON qv.questionid = q.id
                   JOIN {question_bank_entries} qbe ON qbe.id = qv.questionbankentryid
-                 WHERE qbe.questioncategoryid $insql
+                 WHERE 1 = 1
+                   $categorywhere
                    AND qv.version = (
                        SELECT MAX(qv2.version)
                          FROM {question_versions} qv2
@@ -226,8 +248,8 @@ class question_io {
         unset($allanswers); // Free memory.
 
         // Get category name for title.
-        $category = $DB->get_record('question_categories', ['id' => $categoryid], 'name');
-        $categoryname = $category ? $category->name : '';
+        $category = $categoryid > 0 ? $DB->get_record('question_categories', ['id' => $categoryid], 'name') : null;
+        $categoryname = $category ? $category->name : get_string('allcategories', 'local_questions');
 
         // Initialize PDF.
         $pdf = new \pdf('P', 'mm', 'A4', true, 'UTF-8');
@@ -381,6 +403,19 @@ class question_io {
     }
 
     /**
+     * Neutralise spreadsheet formula injection for exported text cells.
+     *
+     * @param string $value Cell value.
+     * @return string Safe CSV cell value.
+     */
+    private static function csv_safe(string $value): string {
+        if ($value !== '' && preg_match('/^[=+\-@\t\r]/', $value)) {
+            return "'" . $value;
+        }
+        return $value;
+    }
+
+    /**
      * Import questions from CSV file.
      *
      * @param string $filepath Path to the uploaded CSV file.
@@ -389,6 +424,8 @@ class question_io {
      */
     public static function import_from_csv(string $filepath, int $categoryid): array {
         global $DB, $USER;
+
+        self::require_category_capability($categoryid, 'moodle/question:add');
 
         $result = [
             'imported' => 0,
@@ -426,6 +463,7 @@ class question_io {
 
         while (($row = fgetcsv($handle)) !== false) {
             $rownum++;
+            $transaction = null;
             
             try {
                 $validation = self::validate_csv_row($row, $headerMap);
@@ -434,6 +472,8 @@ class question_io {
                     $result['skipped']++;
                     continue;
                 }
+
+                $transaction = $DB->start_delegated_transaction();
 
                 // Create question (Moodle 4.0+ structure).
                 $question = new \stdClass();
@@ -490,9 +530,16 @@ class question_io {
                     }
                 }
 
+                $transaction->allow_commit();
                 $result['imported']++;
 
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
+                if (!empty($transaction)) {
+                    try {
+                        $transaction->rollback($e);
+                    } catch (\Throwable $ig) {
+                    }
+                }
                 $result['errors'][] = "Row $rownum: " . $e->getMessage();
                 $result['skipped']++;
             }
@@ -609,6 +656,25 @@ class question_io {
         }
 
         return $ids;
+    }
+
+    /**
+     * Require a Moodle question-bank capability in the relevant category context.
+     *
+     * @param int $categoryid Question category ID, or 0 for all categories.
+     * @param string $capability Capability to require.
+     */
+    private static function require_category_capability(int $categoryid, string $capability): void {
+        global $DB;
+
+        if ($categoryid > 0) {
+            $category = $DB->get_record('question_categories', ['id' => $categoryid], 'id, contextid', MUST_EXIST);
+            $context = \context::instance_by_id($category->contextid);
+        } else {
+            $context = \context_system::instance();
+        }
+
+        require_capability($capability, $context);
     }
 
     /**
