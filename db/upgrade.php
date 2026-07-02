@@ -73,5 +73,38 @@ function xmldb_local_questions_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026010703, 'local', 'questions');
     }
 
+    if ($oldversion < 2026070201) {
+        // Register the temario linking tables that were created out-of-band
+        // (Correos temario session, 2026-06-30) directly against the live DB and
+        // never added to the plugin schema. Guarded with table_exists() so existing
+        // installs (where the tables already hold data) are a no-op; fresh installs
+        // now get them via install.xml too.
+
+        $table = new xmldb_table('local_questions_temario_links');
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('questionid', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+        $table->add_field('tema', XMLDB_TYPE_CHAR, '8', null, null, null, null);
+        $table->add_field('seccion', XMLDB_TYPE_CHAR, '255', null, null, null, null);
+        $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_index('questionid', XMLDB_INDEX_UNIQUE, ['questionid']);
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        $table = new xmldb_table('local_questions_temario_gaps');
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('questionid', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+        $table->add_field('tema', XMLDB_TYPE_CHAR, '8', null, null, null, null);
+        $table->add_field('que_falta', XMLDB_TYPE_CHAR, '255', null, null, null, null);
+        $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        upgrade_plugin_savepoint(true, 2026070201, 'local', 'questions');
+    }
+
     return true;
 }
