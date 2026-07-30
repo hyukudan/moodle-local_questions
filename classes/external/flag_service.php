@@ -64,6 +64,11 @@ class flag_service extends external_api {
         self::validate_context($context);
         require_capability('local/questions:flag', $context);
 
+        // El API es de cara al alumno: los motivos internos (needs_review) no son enviables.
+        if (!array_key_exists($params['reason'], flag_manager::get_student_reasons())) {
+            throw new \moodle_exception('invalidreason', 'local_questions');
+        }
+
         try {
             $flagid = flag_manager::submit_flag(
                 $params['questionid'],

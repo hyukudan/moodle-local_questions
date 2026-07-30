@@ -102,7 +102,7 @@ function local_questions_get_question_footer($questionid, $context = null, $comp
 
     // Get reasons for the modal template.
     $reasons = [];
-    foreach (\local_questions\flag_manager::get_reasons() as $value => $label) {
+    foreach (\local_questions\flag_manager::get_student_reasons() as $value => $label) {
         $reasons[] = ['value' => $value, 'label' => $label];
     }
 

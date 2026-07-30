@@ -24,6 +24,8 @@ class flag_manager {
     const REASON_OUTDATED_LAW = 'outdated_law';
     /** @var string Reason: Ambiguous question */
     const REASON_AMBIGUOUS = 'ambiguous';
+    /** @var string Reason: Automated or manual review required */
+    const REASON_NEEDS_REVIEW = 'needs_review';
     /** @var string Reason: Other */
     const REASON_OTHER = 'other';
 
@@ -54,8 +56,23 @@ class flag_manager {
             self::REASON_WRONG_ANSWER => get_string('reason_wrong_answer', 'local_questions'),
             self::REASON_OUTDATED_LAW => get_string('reason_outdated_law', 'local_questions'),
             self::REASON_AMBIGUOUS => get_string('reason_ambiguous', 'local_questions'),
+            self::REASON_NEEDS_REVIEW => get_string('reason_needs_review', 'local_questions'),
             self::REASON_OTHER => get_string('reason_other', 'local_questions'),
         ];
+    }
+
+    /**
+     * Reasons a student may pick when reporting a question.
+     *
+     * REASON_NEEDS_REVIEW is internal (automated sweeps and the OCR gate) and is
+     * deliberately excluded from student-facing choices and the external API.
+     *
+     * @return array Associative array of reason_code => localized_label
+     */
+    public static function get_student_reasons(): array {
+        $reasons = self::get_reasons();
+        unset($reasons[self::REASON_NEEDS_REVIEW]);
+        return $reasons;
     }
 
     /**
@@ -97,7 +114,7 @@ class flag_manager {
      * @throws \moodle_exception If user already flagged this question
      */
     public static function submit_flag(int $questionid, int $userid, string $reason,
-            string $comment = '', ?int $attemptid = null): int {
+            string $comment = '', ?int $attemptid = null, bool $notify = true): int {
         global $DB;
 
         // Validate reason.
@@ -150,8 +167,11 @@ class flag_manager {
         ]);
         $event->trigger();
 
-        // Notify reviewers about the new flag.
-        self::notify_reviewers($questionid);
+        // Notify reviewers about the new flag (los barridos masivos pasan $notify=false
+        // y confían en el resumen diario de escalate_stale_flags).
+        if ($notify) {
+            self::notify_reviewers($questionid);
+        }
 
         return $flagid;
     }

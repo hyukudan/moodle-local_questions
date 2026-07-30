@@ -147,6 +147,7 @@ $string['reason_error_statement'] = 'Error in question text';
 $string['reason_wrong_answer'] = 'Wrong answer marked as correct';
 $string['reason_outdated_law'] = 'Outdated or repealed regulation';
 $string['reason_ambiguous'] = 'Ambiguous or confusing question';
+$string['reason_needs_review'] = 'Needs review';
 $string['reason_other'] = 'Other reason';
 
 // Flag statuses
