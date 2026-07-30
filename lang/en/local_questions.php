@@ -36,6 +36,7 @@ $string['features_enabled'] = 'Features enabled!';
 $string['questions:manage'] = 'Manage questions administration';
 $string['questions:export'] = 'Export questions statistics';
 $string['task_recalculate_stats'] = 'Recalculate question statistics';
+$string['task_escalate_stale_flags'] = 'Escalate stale question reports';
 
 // Tabs
 $string['questions'] = 'Questions';
@@ -66,6 +67,8 @@ $string['enable_export'] = 'Enable Export';
 $string['enable_export_desc'] = 'Allow users with export capability to export questions to CSV.';
 $string['enable_import'] = 'Enable Import';
 $string['enable_import_desc'] = 'Allow users with import capability to import questions from CSV.';
+$string['escalate_days'] = 'Days before escalating pending reports';
+$string['escalate_days_desc'] = 'Minimum number of days a report must remain pending before it is included in the daily reviewer summary. The effective minimum is 1 day.';
 
 // Export/Import
 $string['exportquestions'] = 'Export Questions';
@@ -234,6 +237,16 @@ $string['notification_newflag_full'] = 'A student has reported a problem with th
 
 Access the reports panel to review the details.';
 $string['notification_newflag_small'] = 'New question reported';
+
+$string['notification_stale_flags_subject'] = '{$a->count} pending question reports require review';
+$string['notification_stale_flags_intro'] = '{$a->count} reports have been pending for at least {$a->days} days and have not been notified in the last 7 days.';
+$string['notification_stale_flags_qid'] = 'Question ID';
+$string['notification_stale_flags_days'] = 'Days pending';
+$string['notification_stale_flags_reason'] = 'Latest report reason';
+$string['notification_stale_flags_review'] = 'Open the report review screen';
+$string['notification_stale_flags_uncategorized'] = 'Uncategorized';
+$string['notification_stale_flags_more'] = 'additional pending flags not listed in this summary';
+$string['notification_stale_flags_unknown_reason'] = 'Reason unavailable';
 
 // Message providers
 $string['messageprovider:flagresolved'] = 'Resolved report notifications';

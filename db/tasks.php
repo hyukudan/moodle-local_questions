@@ -19,4 +19,13 @@ $tasks = [
         'month' => '*',
         'dayofweek' => '*',
     ],
+    [
+        'classname' => 'local_questions\task\escalate_stale_flags',
+        'blocking' => 0,
+        'minute' => '17',
+        'hour' => '3',
+        'day' => '*',
+        'month' => '*',
+        'dayofweek' => '*',
+    ],
 ];

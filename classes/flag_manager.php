@@ -157,15 +157,18 @@ class flag_manager {
     }
 
     /**
-     * Notify users with reviewflags capability about a new flag.
+     * Get the user IDs that should receive reviewer notifications.
      *
-     * @param int $questionid The flagged question ID
+     * Users with the reviewflags capability and site administrators are merged
+     * and deduplicated here so every flag notification uses the same recipients.
+     *
+     * @return int[] Reviewer user IDs
      */
-    private static function notify_reviewers(int $questionid): void {
+    public static function get_reviewer_ids(): array {
         $context = \context_system::instance();
 
         // Get users with the reviewflags capability.
-        $reviewers = get_users_by_capability($context, 'local/questions:reviewflags', 'u.id', '', '', 50);
+        $reviewers = get_users_by_capability($context, 'local/questions:reviewflags', 'u.id');
 
         // Also include site admins (they have all capabilities but aren't returned by get_users_by_capability).
         $admins = get_admins();
@@ -179,11 +182,19 @@ class flag_manager {
             $notifyids[$admin->id] = true;
         }
 
-        if (empty($notifyids)) {
-            return;
-        }
+        $userids = array_map('intval', array_keys($notifyids));
+        sort($userids, SORT_NUMERIC);
 
-        foreach (array_keys($notifyids) as $userid) {
+        return $userids;
+    }
+
+    /**
+     * Notify users with reviewflags capability about a new flag.
+     *
+     * @param int $questionid The flagged question ID
+     */
+    private static function notify_reviewers(int $questionid): void {
+        foreach (self::get_reviewer_ids() as $userid) {
             notification\flag_notification::send_new_flag($userid, $questionid);
         }
     }

@@ -42,6 +42,14 @@ if ($hassiteconfig) {
         1
     ));
 
+    $settings->add(new admin_setting_configtext(
+        'local_questions/escalate_days',
+        get_string('escalate_days', 'local_questions'),
+        get_string('escalate_days_desc', 'local_questions'),
+        7,
+        PARAM_INT
+    ));
+
     // Threshold above which the PDF export is dispatched as an ad-hoc task
     // and the file is delivered to the user via private files + notification.
     // Synchronous TCPDF generation can blow the request memory/time limits
@@ -102,4 +110,3 @@ if ($hassiteconfig) {
         $default_prompt
     ));
 }
-

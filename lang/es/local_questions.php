@@ -36,6 +36,7 @@ $string['features_enabled'] = '¡Funcionalidades habilitadas!';
 $string['questions:manage'] = 'Gestionar administración de preguntas';
 $string['questions:export'] = 'Exportar estadísticas de preguntas';
 $string['task_recalculate_stats'] = 'Recalcular estadísticas de preguntas';
+$string['task_escalate_stale_flags'] = 'Escalar reportes de preguntas envejecidos';
 
 // Tabs
 $string['questions'] = 'Preguntas';
@@ -66,6 +67,8 @@ $string['enable_export'] = 'Habilitar Exportación';
 $string['enable_export_desc'] = 'Permitir a usuarios con capacidad de exportación exportar preguntas a CSV.';
 $string['enable_import'] = 'Habilitar Importación';
 $string['enable_import_desc'] = 'Permitir a usuarios con capacidad de importación importar preguntas desde CSV.';
+$string['escalate_days'] = 'Días hasta escalar reportes pendientes';
+$string['escalate_days_desc'] = 'Número mínimo de días que un reporte debe permanecer pendiente antes de incluirse en el resumen diario para revisores. El mínimo efectivo es 1 día.';
 
 // Export/Import
 $string['exportquestions'] = 'Exportar Preguntas';
@@ -238,6 +241,16 @@ $string['notification_newflag_full'] = 'Un estudiante ha reportado un problema c
 
 Accede al panel de reportes para revisar el detalle.';
 $string['notification_newflag_small'] = 'Nueva pregunta reportada';
+
+$string['notification_stale_flags_subject'] = '{$a->count} reportes de preguntas pendientes requieren revisión';
+$string['notification_stale_flags_intro'] = 'Hay {$a->count} reportes que llevan al menos {$a->days} días pendientes y no se han avisado en los últimos 7 días.';
+$string['notification_stale_flags_qid'] = 'ID de pregunta';
+$string['notification_stale_flags_days'] = 'Días pendiente';
+$string['notification_stale_flags_reason'] = 'Motivo del último reporte';
+$string['notification_stale_flags_review'] = 'Abrir la pantalla de revisión de reportes';
+$string['notification_stale_flags_uncategorized'] = 'Sin categoría';
+$string['notification_stale_flags_more'] = 'reportes adicionales no listados en este resumen';
+$string['notification_stale_flags_unknown_reason'] = 'Motivo no disponible';
 
 // Message providers
 $string['messageprovider:flagresolved'] = 'Notificaciones de reportes resueltos';

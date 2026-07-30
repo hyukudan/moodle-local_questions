@@ -10,7 +10,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'local_questions';
-$plugin->version   = 2026070201;  // Register temario_links/temario_gaps tables in schema (were created out-of-band)
+$plugin->version   = 2026073000;  // Add daily escalation for stale question flags.
 $plugin->requires  = 2024042200;  // Moodle 4.4+ (Bootstrap 5 required).
 $plugin->maturity  = MATURITY_BETA;
-$plugin->release   = '0.5.2';
+$plugin->release   = '0.5.3';
