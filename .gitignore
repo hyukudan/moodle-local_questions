@@ -1,18 +1,21 @@
-# Dependencies
-node_modules/
-
-# Build artifacts (optional - some prefer to commit minified files)
-# amd/build/
+# Claude Code
+CLAUDE.md
 
 # IDE
 .idea/
 .vscode/
 *.swp
 *.swo
+*~
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Local config
-*.local.md
+# Node
+node_modules/
+npm-debug.log*
+
+# Backups
+*.bak
+*.bak.*

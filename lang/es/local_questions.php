@@ -213,28 +213,20 @@ $string['flagresolved'] = 'El reporte ha sido resuelto correctamente.';
 $string['flagdismissed'] = 'El reporte ha sido descartado.';
 
 // Notifications
-$string['notification_resolved_subject'] = 'Tu reporte sobre la pregunta "{$a->questionname}" ha sido resuelto';
-$string['notification_resolved_full'] = '¡Gracias por avisarnos! 🙌 Hemos revisado tu reporte y ya está resuelto.
+$string['notification_resolved_subject'] = 'Tu reporte sobre «{$a->questionname}» — corregido';
+$string['notification_resolved_full'] = 'Hemos revisado tu aviso y la pregunta ya está corregida.
 
 Pregunta: {$a->questionpreview}
 
-Qué hemos corregido: {$a->resolution}
-
-Nota del equipo docente:
-{$a->feedback}
-
-Avisos como el tuyo nos ayudan a mejorar el temario para todos. ¡Sigue así!';
+{$a->feedback}';
 $string['notification_resolved_small'] = 'Tu reporte ha sido resuelto';
 
-$string['notification_dismissed_subject'] = 'Tu reporte sobre la pregunta "{$a->questionname}" ha sido revisado';
-$string['notification_dismissed_full'] = '¡Gracias por tu reporte! 🙌 La hemos revisado a fondo y, tras comprobarla, la pregunta es correcta tal y como está.
+$string['notification_dismissed_subject'] = 'Tu reporte sobre «{$a->questionname}» — revisado';
+$string['notification_dismissed_full'] = 'Hemos revisado tu aviso y, tras comprobarla contra la norma, la pregunta es correcta tal y como está.
 
 Pregunta: {$a->questionpreview}
 
-Aclaración del equipo docente:
-{$a->feedback}
-
-Dudar y cuestionar es parte de aprender: cada revisión nos ayuda a tener un banco más fiable. ¡A por la siguiente!';
+{$a->feedback}';
 $string['notification_dismissed_small'] = 'Tu reporte ha sido revisado';
 
 $string['notification_newflag_subject'] = 'Nueva pregunta reportada: {$a->questionname}';
